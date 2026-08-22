@@ -59,8 +59,9 @@ export async function GET() {
     }
 
     return NextResponse.json({ success: true, message: 'Vercel Postgres Database Initialized and Seeded!' });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Database setup error:', error);
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    const msg = error instanceof Error ? error.message : 'Unknown error';
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
