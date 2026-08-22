@@ -4,7 +4,7 @@ import { CartItem } from '@/lib/store';
 
 // Initialize stripe with a dummy key if env var is missing to avoid crashing during dev
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY || 'sk_test_dummy', {
-  apiVersion: '2024-06-20',
+  apiVersion: '2026-07-29.dahlia',
 });
 
 export async function POST(request: Request) {
