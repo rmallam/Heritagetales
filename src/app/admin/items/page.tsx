@@ -32,11 +32,11 @@ export default function AdminItemsPage() {
             </div>
           </div>
           <div>
-            <label htmlFor="image_url" className="block text-sm font-semibold text-neutral-900 mb-2">Primary Image URL</label>
-            <input type="url" id="image_url" name="image_url" className="w-full px-4 py-3 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition-all" placeholder="https://example.com/image.jpg" />
+            <label htmlFor="image_file" className="block text-sm font-semibold text-neutral-900 mb-2">Primary Image (Upload File)</label>
+            <input type="file" id="image_file" name="image_file" accept="image/*" className="w-full px-4 py-3 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition-all bg-white" />
           </div>
           <div>
-            <label htmlFor="additional_images" className="block text-sm font-semibold text-neutral-900 mb-2">Additional Images (Comma Separated URLs)</label>
+            <label htmlFor="additional_images" className="block text-sm font-semibold text-neutral-900 mb-2">Additional Images (Optional - Comma Separated URLs for now)</label>
             <textarea id="additional_images" name="additional_images" rows={2} className="w-full px-4 py-3 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition-all resize-none" placeholder="https://img1.jpg, https://img2.jpg"></textarea>
           </div>
           <div>

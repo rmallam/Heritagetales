@@ -30,15 +30,30 @@ export async function getItem(id: string): Promise<Item | undefined> {
   }
 }
 
+import { put } from '@vercel/blob';
+
 export async function addItem(formData: FormData) {
   const title = formData.get('title') as string;
   const description = formData.get('description') as string;
   const priceStr = formData.get('price') as string;
-  const image_url = formData.get('image_url') as string;
+  const imageFile = formData.get('image_file') as File;
   const additionalStr = formData.get('additional_images') as string;
 
   if (!title || !priceStr) {
     throw new Error('Title and price are required.');
+  }
+
+  let image_url = '';
+  
+  if (imageFile && imageFile.size > 0) {
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      console.warn('Vercel Blob token is missing! Cannot upload image. Please add Vercel Blob storage to your project.');
+    } else {
+      const blob = await put(imageFile.name, imageFile, {
+        access: 'public',
+      });
+      image_url = blob.url;
+    }
   }
 
   const price = parseFloat(priceStr);
