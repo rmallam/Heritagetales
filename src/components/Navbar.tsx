@@ -23,7 +23,7 @@ export default function Navbar() {
       <div className="max-w-7xl mx-auto px-6 py-5 flex justify-between items-center">
         <Link href="/">
           <h1 className="text-2xl font-bold text-[#222222] tracking-tighter font-serif">
-            SDR <span className="text-[#b5955b]">COLLECTIONS</span>
+            HERITAGE <span className="text-[#b5955b]">TALES</span>
           </h1>
         </Link>
         <nav className="flex space-x-6 items-center">

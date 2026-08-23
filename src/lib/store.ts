@@ -48,7 +48,7 @@ export const useCartStore = create<CartStore>()(
       toggleCart: () => set({ isOpen: !get().isOpen }),
     }),
     {
-      name: 'sdr-cart',
+      name: 'heritage-cart',
     }
   )
 );

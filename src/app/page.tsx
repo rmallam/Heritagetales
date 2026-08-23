@@ -12,7 +12,7 @@ export default async function Home() {
       <section className="bg-[#111111] text-[#f8f8f8] py-32 px-6 text-center border-b-[8px] border-[#b5955b]">
         <h2 className="text-5xl md:text-7xl font-bold mb-6 font-serif tracking-tight">Authentic Heritage</h2>
         <p className="text-lg md:text-xl text-[#a3a3a3] max-w-2xl mx-auto font-light leading-relaxed">
-          Premium, heavy-duty brassware curated by SDR Collections. Designed for generations.
+          Premium, heavy-duty brassware curated by Heritage Tales. Designed for generations.
         </p>
       </section>
 

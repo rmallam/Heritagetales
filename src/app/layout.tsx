@@ -8,7 +8,7 @@ const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 const playfair = Playfair_Display({ subsets: ["latin"], variable: "--font-serif" });
 
 export const metadata: Metadata = {
-  title: "SDR Collections",
+  title: "Heritage Tales",
   description: "Premium Indian Brassware and curated collections.",
 };
 

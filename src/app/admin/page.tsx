@@ -3,7 +3,16 @@ import { ArrowLeft, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
 
+import { auth } from '@clerk/nextjs/server';
+
 export default function AdminPage() {
+  const { userId } = auth();
+  const ADMIN_USER_ID = process.env.ADMIN_USER_ID;
+
+  if (!ADMIN_USER_ID || userId !== ADMIN_USER_ID) {
+    redirect('/');
+  }
+
   async function handleSubmit(formData: FormData) {
     'use server';
     await addItem(formData);
