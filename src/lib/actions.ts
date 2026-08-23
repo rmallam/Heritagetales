@@ -2,7 +2,13 @@
 
 import { sql } from '@vercel/postgres';
 import { revalidatePath } from 'next/cache';
+import { auth } from '@clerk/nextjs/server';
 import { Item } from './db';
+
+export async function checkIsAdmin() {
+  const { userId } = auth();
+  return userId && userId === process.env.ADMIN_USER_ID;
+}
 
 export async function getItems(): Promise<Item[]> {
   try {

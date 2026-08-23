@@ -29,8 +29,8 @@ export async function GET() {
       )
     `;
 
-    try { await sql`ALTER TABLE orders ADD COLUMN carrier TEXT`; } catch (e) {}
-    try { await sql`ALTER TABLE orders ADD COLUMN tracking_number TEXT`; } catch (e) {}
+    try { await sql`ALTER TABLE orders ADD COLUMN carrier TEXT`; } catch {}
+    try { await sql`ALTER TABLE orders ADD COLUMN tracking_number TEXT`; } catch {}
 
     // 2. Clear existing dummy data (optional, but ensures a clean slate)
     await sql`DELETE FROM items`;

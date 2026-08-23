@@ -5,16 +5,23 @@ import { ShoppingCart, Search } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
-import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import { checkIsAdmin } from '@/lib/actions';
+import { SignInButton, SignUpButton, SignedIn, SignedOut, UserButton, useAuth } from '@clerk/nextjs';
 
 export default function Navbar() {
   const { items, toggleCart } = useCartStore();
   const [mounted, setMounted] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const { userId } = useAuth();
   
-  // Hydration fix for zustand persist
   useEffect(() => {
     setMounted(true);
-  }, []);
+    if (userId) {
+      checkIsAdmin().then(res => setIsAdmin(!!res));
+    } else {
+      setIsAdmin(false);
+    }
+  }, [userId]);
 
   const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
 
@@ -36,9 +43,11 @@ export default function Navbar() {
             <Search className="w-4 h-4 text-neutral-400 absolute right-3 top-3 pointer-events-none" />
           </div>
 
-          <Link href="/admin" className="text-sm font-semibold text-[#666666] hover:text-[#222222] transition-colors tracking-wide uppercase hidden sm:block">
-            Admin
-          </Link>
+          {isAdmin && (
+            <Link href="/admin" className="text-sm font-semibold text-[#666666] hover:text-[#222222] transition-colors tracking-wide uppercase hidden sm:block">
+              Admin
+            </Link>
+          )}
           <SignedIn>
             <Link href="/orders" className="text-sm font-semibold text-[#666666] hover:text-[#b5955b] transition-colors tracking-wide uppercase">
               Orders
