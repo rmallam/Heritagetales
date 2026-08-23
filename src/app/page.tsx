@@ -8,12 +8,27 @@ export default async function Home() {
 
   return (
     <main className="min-h-screen bg-[#fcfcfc]">
-      {/* Hero Section */}
-      <section className="bg-[#111111] text-[#f8f8f8] py-32 px-6 text-center border-b-[8px] border-[#b5955b]">
-        <h2 className="text-5xl md:text-7xl font-bold mb-6 font-serif tracking-tight">Authentic Heritage</h2>
-        <p className="text-lg md:text-xl text-[#a3a3a3] max-w-2xl mx-auto font-light leading-relaxed">
-          Premium, heavy-duty brassware curated by Heritage Tales. Designed for generations.
-        </p>
+      <section className="relative bg-[#111111] text-[#f8f8f8] py-40 px-6 text-center border-b-[8px] border-[#b5955b] overflow-hidden flex flex-col justify-center items-center min-h-[60vh]">
+        {/* Background Video */}
+        <video 
+          autoPlay 
+          loop 
+          muted 
+          playsInline 
+          className="absolute top-0 left-0 w-full h-full object-cover opacity-40 mix-blend-luminosity pointer-events-none"
+        >
+          <source src="/hero.mp4" type="video/mp4" />
+        </video>
+        
+        {/* Overlay gradient for text readability */}
+        <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/60 to-black/20 pointer-events-none"></div>
+
+        <div className="relative z-10">
+          <h2 className="text-5xl md:text-7xl font-bold mb-6 font-serif tracking-tight drop-shadow-lg">Authentic Heritage</h2>
+          <p className="text-lg md:text-xl text-[#e5e5e5] max-w-2xl mx-auto font-light leading-relaxed drop-shadow">
+            Premium, heavy-duty brassware curated by Heritage Tales. Designed for generations.
+          </p>
+        </div>
       </section>
 
       {/* Catalog Grid */}

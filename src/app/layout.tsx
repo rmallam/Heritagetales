@@ -14,6 +14,8 @@ export const metadata: Metadata = {
 
 import { ClerkProvider } from '@clerk/nextjs'
 
+import Footer from '@/components/Footer';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -22,10 +24,11 @@ export default function RootLayout({
   return (
     <ClerkProvider>
       <html lang="en">
-        <body className={`${inter.variable} ${playfair.variable} font-sans bg-[#fcfcfc] antialiased`}>
+        <body className={`${inter.className} ${playfair.variable} bg-[#fcfcfc] text-[#222222]`}>
           <Navbar />
-          <CartDrawer />
           {children}
+          <CartDrawer />
+          <Footer />
         </body>
       </html>
     </ClerkProvider>

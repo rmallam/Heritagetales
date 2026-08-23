@@ -4,9 +4,12 @@ import { useCartStore } from '@/lib/store';
 import { X, Minus, Plus, ShoppingBag } from 'lucide-react';
 import { useState } from 'react';
 
+import { useAuth } from '@clerk/nextjs';
+
 export default function CartDrawer() {
   const { items, isOpen, toggleCart, removeItem, updateQuantity } = useCartStore();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
+  const { userId } = useAuth();
 
   const subtotal = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
@@ -16,7 +19,7 @@ export default function CartDrawer() {
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items }),
+        body: JSON.stringify({ items, userId }),
       });
       const data = await response.json();
       if (data.url) {

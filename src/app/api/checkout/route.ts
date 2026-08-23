@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ url: `${origin}/success` });
     }
 
-    const { items }: { items: CartItem[] } = await request.json();
+    const { items, userId }: { items: CartItem[], userId?: string | null } = await request.json();
 
     const origin = request.headers.get('origin') || 'http://localhost:3000';
 
@@ -47,6 +47,10 @@ export async function POST(request: Request) {
       cancel_url: `${origin}/`,
       shipping_address_collection: {
         allowed_countries: ['AU'],
+      },
+      metadata: {
+        userId: userId || 'guest',
+        items_json: JSON.stringify(items.map(i => ({ id: i.id, quantity: i.quantity, price: i.price }))),
       }
     });
 

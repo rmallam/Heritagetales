@@ -16,6 +16,19 @@ export async function GET() {
       )
     `;
 
+    // Create the orders table
+    await sql`
+      CREATE TABLE IF NOT EXISTS orders (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT NOT NULL,
+        stripe_session_id TEXT UNIQUE NOT NULL,
+        amount_total REAL NOT NULL,
+        status TEXT NOT NULL,
+        items_json TEXT NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
+
     // 2. Clear existing dummy data (optional, but ensures a clean slate)
     await sql`DELETE FROM items`;
 
