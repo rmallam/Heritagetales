@@ -37,8 +37,11 @@ export async function POST(req: Request) {
       const itemsJson = session.metadata?.items_json || '[]';
       const amountTotal = (session.amount_total || 0) / 100;
       const status = 'paid';
+      // Handle different Stripe API versions and fallbacks
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const shippingAddress = (session as any).shipping_details ? JSON.stringify((session as any).shipping_details) : null;
+      const s = session as any;
+      const addressObj = s.shipping_details || s.shipping || s.customer_details;
+      const shippingAddress = addressObj ? JSON.stringify(addressObj) : null;
       
       try {
         await sql`
