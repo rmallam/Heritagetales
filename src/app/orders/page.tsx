@@ -5,6 +5,8 @@ import { Package, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import OrderCard from '@/components/OrderCard';
 
+export const dynamic = 'force-dynamic';
+
 type Order = {
   id: number;
   user_id: string;

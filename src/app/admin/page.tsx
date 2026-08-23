@@ -5,6 +5,8 @@ import { redirect } from 'next/navigation';
 import { auth } from '@clerk/nextjs/server';
 import { sql } from '@vercel/postgres';
 
+export const dynamic = 'force-dynamic';
+
 type Order = {
   id: number;
   user_id: string;
