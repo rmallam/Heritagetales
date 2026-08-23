@@ -23,7 +23,8 @@ export default async function OrdersPage() {
   }
 
   let orders: Order[] = [];
-  let allItems: any[] = [];
+  type Product = { id: number, title: string, image_url: string, price: number };
+  let allItems: Product[] = [];
   try {
     const { rows } = await sql<Order>`
       SELECT * FROM orders 
@@ -32,13 +33,13 @@ export default async function OrdersPage() {
     `;
     orders = rows;
 
-    const itemsRes = await sql`SELECT * FROM items`;
+    const itemsRes = await sql<Product>`SELECT id, title, image_url, price FROM items`;
     allItems = itemsRes.rows;
   } catch (err) {
     console.error('Error fetching orders:', err);
   }
 
-  const itemsDict = allItems.reduce((acc: Record<number, any>, item) => {
+  const itemsDict = allItems.reduce((acc: Record<number, Product>, item) => {
     acc[item.id] = item;
     return acc;
   }, {});

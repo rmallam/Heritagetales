@@ -3,10 +3,23 @@
 import { useState } from 'react';
 import { Package, ChevronDown, ChevronUp } from 'lucide-react';
 
-export default function OrderCard({ order, itemsDict }: { order: any, itemsDict: any }) {
+type Order = {
+  id: number;
+  user_id: string;
+  stripe_session_id: string;
+  amount_total: number;
+  status: string;
+  items_json: string;
+  created_at: Date;
+};
+
+type Product = { id: number, title: string, image_url: string, price: number };
+type CartItem = { id: number, quantity: number, price: number };
+
+export default function OrderCard({ order, itemsDict }: { order: Order, itemsDict: Record<number, Product> }) {
   const [isOpen, setIsOpen] = useState(false);
-  const items = JSON.parse(order.items_json);
-  const itemCount = items.reduce((acc: number, item: { quantity: number }) => acc + item.quantity, 0);
+  const items: CartItem[] = JSON.parse(order.items_json);
+  const itemCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
     <div className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden transition-shadow hover:shadow-md">
@@ -52,7 +65,7 @@ export default function OrderCard({ order, itemsDict }: { order: any, itemsDict:
       {isOpen && (
         <div className="border-t border-neutral-100 bg-neutral-50/50 p-6 space-y-4">
           <h5 className="font-bold text-neutral-900 mb-4">Items in your order</h5>
-          {items.map((item: any) => {
+          {items.map((item) => {
             const product = itemsDict[item.id];
             return (
               <div key={item.id} className="flex items-center justify-between bg-white p-4 rounded-xl border border-neutral-100 shadow-sm">
