@@ -172,15 +172,15 @@ export default function AdminOrdersTable({ orders, itemsDict }: { orders: Order[
                       <div key={cartItem.id} className="p-4 flex items-center justify-between bg-white hover:bg-neutral-50">
                         <div className="flex items-center gap-4">
                           <div className="w-12 h-12 bg-neutral-100 rounded overflow-hidden">
-                            {product?.image_url ? (
+                            {(cartItem.image_url || product?.image_url) ? (
                               // eslint-disable-next-line @next/next/no-img-element
-                              <img src={product.image_url} alt="Item" className="w-full h-full object-cover" />
+                              <img src={(cartItem.image_url || product?.image_url)} alt="Item" className="w-full h-full object-cover" />
                             ) : (
                               <Package className="w-full h-full p-2 text-neutral-300" />
                             )}
                           </div>
                           <div>
-                            <p className="font-bold text-sm text-neutral-900">{product?.title || 'Unknown Product'}</p>
+                            <p className="font-bold text-sm text-neutral-900">{cartItem.title || product?.title || `Product #${cartItem.id}`}</p>
                             <p className="text-xs text-neutral-500">Qty: {cartItem.quantity} x ${cartItem.price.toFixed(2)}</p>
                           </div>
                         </div>

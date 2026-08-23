@@ -16,7 +16,7 @@ type Order = {
 };
 
 type Product = { id: number, title: string, image_url: string, price: number };
-type CartItem = { id: number, quantity: number, price: number };
+type CartItem = { id: number, quantity: number, price: number, title?: string, image_url?: string };
 
 export default function OrderCard({ order, itemsDict }: { order: Order, itemsDict: Record<number, Product> }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -81,15 +81,15 @@ export default function OrderCard({ order, itemsDict }: { order: Order, itemsDic
               <div key={item.id} className="flex items-center justify-between bg-white p-4 rounded-xl border border-neutral-100 shadow-sm">
                 <div className="flex items-center gap-4">
                   <div className="w-16 h-16 bg-neutral-100 rounded-lg overflow-hidden border border-neutral-200">
-                    {product?.image_url ? (
+                    {(item.image_url || product?.image_url) ? (
                       /* eslint-disable-next-line @next/next/no-img-element */
-                      <img src={product.image_url} alt={product.title} className="w-full h-full object-cover" />
+                      <img src={(item.image_url || product?.image_url)} alt={(item.title || product?.title || 'Product')} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center text-xs text-neutral-400">No Img</div>
                     )}
                   </div>
                   <div>
-                    <p className="font-bold text-neutral-900">{product?.title || `Product #${item.id}`}</p>
+                    <p className="font-bold text-neutral-900">{item.title || product?.title || `Product #${item.id}`}</p>
                     <p className="text-sm text-neutral-500">Qty: {item.quantity}</p>
                   </div>
                 </div>

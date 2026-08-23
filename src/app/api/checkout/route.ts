@@ -63,7 +63,13 @@ export async function POST(request: Request) {
       },
       metadata: {
         userId: userId || 'guest',
-        items_json: JSON.stringify(items.map(i => ({ id: i.id, quantity: i.quantity, price: i.price }))),
+        items_json: JSON.stringify(items.map(i => ({ 
+          id: i.id, 
+          quantity: i.quantity, 
+          price: i.price,
+          title: i.title,
+          image_url: i.image_url
+        }))),
       }
     });
 
