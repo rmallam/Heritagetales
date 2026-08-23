@@ -3,6 +3,7 @@ import { sql } from '@vercel/postgres';
 import { redirect } from 'next/navigation';
 import { Package, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import OrderCard from '@/components/OrderCard';
 
 type Order = {
   id: number;
@@ -21,8 +22,8 @@ export default async function OrdersPage() {
     redirect('/');
   }
 
-  // Fetch orders for this user
   let orders: Order[] = [];
+  let allItems: any[] = [];
   try {
     const { rows } = await sql<Order>`
       SELECT * FROM orders 
@@ -30,9 +31,17 @@ export default async function OrdersPage() {
       ORDER BY created_at DESC
     `;
     orders = rows;
+
+    const itemsRes = await sql`SELECT * FROM items`;
+    allItems = itemsRes.rows;
   } catch (err) {
     console.error('Error fetching orders:', err);
   }
+
+  const itemsDict = allItems.reduce((acc: Record<number, any>, item) => {
+    acc[item.id] = item;
+    return acc;
+  }, {});
 
   return (
     <div className="min-h-screen bg-[#fcfcfc] py-20 px-6 font-sans">
@@ -58,48 +67,9 @@ export default async function OrdersPage() {
           </div>
         ) : (
           <div className="space-y-6">
-            {orders.map(order => {
-              const items = JSON.parse(order.items_json);
-              const itemCount = items.reduce((acc: number, item: { quantity: number }) => acc + item.quantity, 0);
-              
-              return (
-                <div key={order.id} className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden transition-shadow hover:shadow-md">
-                  <div className="border-b border-neutral-100 bg-neutral-50 px-6 py-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div>
-                      <p className="text-sm font-medium text-neutral-500">Order Placed</p>
-                      <p className="text-sm font-bold text-neutral-900">{new Date(order.created_at).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-neutral-500">Total Amount</p>
-                      <p className="text-sm font-bold text-neutral-900">${order.amount_total.toFixed(2)}</p>
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-neutral-500">Order ID</p>
-                      <p className="text-xs font-mono text-neutral-600 bg-white px-2 py-1 rounded border border-neutral-200 mt-1">
-                        #{order.stripe_session_id.slice(-8).toUpperCase()}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="px-6 py-6 flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <div className="w-12 h-12 bg-[#f8f8f8] rounded-lg flex items-center justify-center border border-neutral-200">
-                        <Package className="w-6 h-6 text-[#b5955b]" />
-                      </div>
-                      <div>
-                        <h4 className="font-bold text-neutral-900">{itemCount} item{itemCount !== 1 ? 's' : ''} ordered</h4>
-                        <p className="text-sm text-[#b5955b] font-medium capitalize flex items-center mt-1">
-                          <span className="w-2 h-2 rounded-full bg-[#b5955b] mr-2"></span>
-                          {order.status}
-                        </p>
-                      </div>
-                    </div>
-                    <button className="text-sm font-semibold text-neutral-600 hover:text-black hover:underline transition-colors">
-                      View Details
-                    </button>
-                  </div>
-                </div>
-              );
-            })}
+            {orders.map(order => (
+              <OrderCard key={order.id} order={order} itemsDict={itemsDict} />
+            ))}
           </div>
         )}
       </div>
