@@ -42,10 +42,11 @@ export default function ProductCard({ item, discount = 0 }: { item: Item, discou
             )}
           </div>
           <button 
-            onClick={() => addItem(item)}
-            className="px-6 py-2.5 bg-[#222222] text-white text-sm font-semibold rounded-full hover:bg-[#b5955b] transition-colors shadow-md"
+            disabled={!item.in_stock}
+            onClick={() => item.in_stock && addItem(item)}
+            className={`px-6 py-2.5 text-white text-sm font-semibold rounded-full transition-colors shadow-md ${!item.in_stock ? 'bg-neutral-400 cursor-not-allowed' : 'bg-[#222222] hover:bg-[#b5955b]'}`}
           >
-            Add to Cart
+            {!item.in_stock ? 'Out of Stock' : 'Add to Cart'}
           </button>
         </div>
       </div>

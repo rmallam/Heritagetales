@@ -16,6 +16,9 @@ export async function GET() {
       )
     `;
 
+    try { await sql`ALTER TABLE items ADD COLUMN is_active BOOLEAN DEFAULT true`; } catch {}
+    try { await sql`ALTER TABLE items ADD COLUMN in_stock BOOLEAN DEFAULT true`; } catch {}
+
     // Create the orders table
     await sql`
       CREATE TABLE IF NOT EXISTS orders (

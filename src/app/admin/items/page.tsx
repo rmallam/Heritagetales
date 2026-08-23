@@ -1,10 +1,13 @@
-import { addItem } from '@/lib/actions';
+import { addItem, getAllAdminItems } from '@/lib/actions';
 import { Plus } from 'lucide-react';
 import { redirect } from 'next/navigation';
+import AdminItemsList from '@/components/AdminItemsList';
 
 export const dynamic = 'force-dynamic';
 
-export default function AdminItemsPage() {
+export default async function AdminItemsPage() {
+  const items = await getAllAdminItems();
+
   async function handleSubmit(formData: FormData) {
     'use server';
     await addItem(formData);
@@ -49,6 +52,13 @@ export default function AdminItemsPage() {
           </button>
         </form>
       </div>
+
+      <div className="mt-16 mb-8 border-b border-neutral-100 pb-6">
+        <h2 className="text-2xl font-bold text-neutral-900 tracking-tight">Manage Inventory</h2>
+        <p className="text-neutral-500 mt-2">Update stock status or archive products from your catalog.</p>
+      </div>
+
+      <AdminItemsList items={items} />
     </div>
   );
 }

@@ -12,11 +12,41 @@ export async function checkIsAdmin() {
 
 export async function getItems(): Promise<Item[]> {
   try {
-    const { rows } = await sql<Item>`SELECT * FROM items ORDER BY created_at DESC`;
+    const { rows } = await sql<Item>`SELECT * FROM items WHERE is_active = true ORDER BY created_at DESC`;
     return rows;
   } catch (error) {
     console.error('Error fetching items:', error);
     return [];
+  }
+}
+
+export async function getAllAdminItems(): Promise<Item[]> {
+  try {
+    const { rows } = await sql<Item>`SELECT * FROM items ORDER BY created_at DESC`;
+    return rows;
+  } catch (error) {
+    console.error('Error fetching admin items:', error);
+    return [];
+  }
+}
+
+export async function toggleItemStock(id: number, currentStock: boolean) {
+  try {
+    await sql`UPDATE items SET in_stock = ${!currentStock} WHERE id = ${id}`;
+    revalidatePath('/');
+    revalidatePath('/admin/items');
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function toggleItemActive(id: number, currentActive: boolean) {
+  try {
+    await sql`UPDATE items SET is_active = ${!currentActive} WHERE id = ${id}`;
+    revalidatePath('/');
+    revalidatePath('/admin/items');
+  } catch (e) {
+    console.error(e);
   }
 }
 
