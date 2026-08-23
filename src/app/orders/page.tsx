@@ -51,7 +51,7 @@ export default async function OrdersPage() {
               <Package className="w-10 h-10 text-neutral-300" />
             </div>
             <h3 className="text-xl font-bold text-neutral-900 mb-2">No orders found</h3>
-            <p className="text-neutral-500 max-w-md mx-auto mb-8">You haven't placed any orders yet. Explore our premium brassware collection to find your next heirloom.</p>
+            <p className="text-neutral-500 max-w-md mx-auto mb-8">You haven&apos;t placed any orders yet. Explore our premium brassware collection to find your next heirloom.</p>
             <Link href="/" className="bg-black text-white px-8 py-3 rounded-full font-semibold hover:bg-neutral-800 transition-colors">
               Start Shopping
             </Link>
@@ -60,7 +60,7 @@ export default async function OrdersPage() {
           <div className="space-y-6">
             {orders.map(order => {
               const items = JSON.parse(order.items_json);
-              const itemCount = items.reduce((acc: number, item: any) => acc + item.quantity, 0);
+              const itemCount = items.reduce((acc: number, item: { quantity: number }) => acc + item.quantity, 0);
               
               return (
                 <div key={order.id} className="bg-white border border-neutral-200 rounded-2xl shadow-sm overflow-hidden transition-shadow hover:shadow-md">

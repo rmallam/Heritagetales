@@ -66,6 +66,7 @@ export default function CartDrawer() {
               {items.map((item) => (
                 <div key={item.id} className="flex gap-4">
                   <div className="w-20 h-20 bg-neutral-100 rounded-md overflow-hidden flex-shrink-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     {item.image_url && <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />}
                   </div>
                   <div className="flex flex-col justify-between flex-1">

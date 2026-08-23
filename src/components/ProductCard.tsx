@@ -12,6 +12,7 @@ export default function ProductCard({ item }: { item: Item }) {
     <div className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-[#e5e5e5] flex flex-col transform hover:-translate-y-1">
       <Link href={`/product/${item.id}`} className="aspect-square bg-[#f8f8f8] relative overflow-hidden block">
         {item.image_url ? (
+          /* eslint-disable-next-line @next/next/no-img-element */
           <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out" />
         ) : (
           <div className="w-full h-full flex items-center justify-center text-neutral-400">No Image</div>

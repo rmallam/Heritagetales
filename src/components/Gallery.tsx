@@ -14,6 +14,7 @@ export default function Gallery({ images }: { images: string[] }) {
   return (
     <div className="flex flex-col gap-4">
       <div className="aspect-square bg-[#f8f8f8] rounded-2xl overflow-hidden border border-[#e5e5e5]">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={mainImage} alt="Product image" className="w-full h-full object-cover transition-opacity duration-300" />
       </div>
       
@@ -25,6 +26,7 @@ export default function Gallery({ images }: { images: string[] }) {
               onClick={() => setMainImage(img)}
               className={`w-24 h-24 rounded-lg overflow-hidden border-2 flex-shrink-0 transition-all ${mainImage === img ? 'border-[#b5955b] opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
             >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={img} className="w-full h-full object-cover" alt={`Thumbnail ${idx + 1}`} />
             </button>
           ))}
