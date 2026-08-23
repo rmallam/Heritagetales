@@ -131,24 +131,32 @@ export default function AdminOrdersTable({ orders, itemsDict }: { orders: Order[
                   <p className="text-sm text-neutral-600 mt-1">{new Date(selectedOrder.created_at).toLocaleString()}</p>
                 </div>
                 
-                {selectedOrder.shipping_address && (
+                {selectedOrder.shipping_address ? (
                   <div className="bg-neutral-50 p-4 rounded-xl border border-neutral-200">
                     <h4 className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-2 flex items-center">
                       <Truck className="w-4 h-4 mr-1" />
                       Shipping Details
                     </h4>
                     {(() => {
-                      const addr = JSON.parse(selectedOrder.shipping_address);
-                      return (
-                        <div className="text-sm text-neutral-800">
-                          <p className="font-bold">{addr.name}</p>
-                          <p>{addr.address?.line1}</p>
-                          {addr.address?.line2 && <p>{addr.address.line2}</p>}
-                          <p>{addr.address?.city}, {addr.address?.state} {addr.address?.postal_code}</p>
-                          <p>{addr.address?.country}</p>
-                        </div>
-                      )
+                      try {
+                        const addr = JSON.parse(selectedOrder.shipping_address);
+                        return (
+                          <div className="text-sm text-neutral-800">
+                            <p className="font-bold">{addr.name}</p>
+                            <p>{addr.address?.line1}</p>
+                            {addr.address?.line2 && <p>{addr.address.line2}</p>}
+                            <p>{addr.address?.city}, {addr.address?.state} {addr.address?.postal_code}</p>
+                            <p>{addr.address?.country}</p>
+                          </div>
+                        )
+                      } catch {
+                        return <p className="text-sm text-neutral-500 italic">Failed to parse address.</p>;
+                      }
                     })()}
+                  </div>
+                ) : (
+                  <div className="bg-neutral-50 p-4 rounded-xl border border-neutral-200 flex items-center justify-center h-full min-h-[100px]">
+                    <p className="text-sm text-neutral-400 italic">No shipping address collected for this order.</p>
                   </div>
                 )}
               </div>
