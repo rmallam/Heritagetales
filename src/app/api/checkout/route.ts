@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ url: `${origin}/success` });
     }
 
-    const { items, userId }: { items: CartItem[], userId?: string | null } = await request.json();
+    const { items, userId, email }: { items: CartItem[], userId?: string | null, email?: string | null } = await request.json();
 
     const origin = request.headers.get('origin') || 'http://localhost:3000';
 
@@ -51,7 +51,7 @@ export async function POST(request: Request) {
       discounts = [{ coupon: coupon.id }];
     }
 
-    const session = await stripe.checkout.sessions.create({
+    const sessionConfig: Stripe.Checkout.SessionCreateParams = {
       payment_method_types: ['card'],
       line_items,
       mode: 'payment',
@@ -71,7 +71,13 @@ export async function POST(request: Request) {
           image_url: i.image_url
         }))),
       }
-    });
+    };
+
+    if (email) {
+      sessionConfig.customer_email = email;
+    }
+
+    const session = await stripe.checkout.sessions.create(sessionConfig);
 
     return NextResponse.json({ url: session.url });
   } catch (error: unknown) {
