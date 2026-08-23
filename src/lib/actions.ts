@@ -49,3 +49,23 @@ export async function addItem(formData: FormData) {
     throw new Error('Failed to insert item.');
   }
 }
+
+export async function fulfillOrder(formData: FormData) {
+  const id = formData.get('id') as string;
+  const carrier = formData.get('carrier') as string;
+  const trackingNumber = formData.get('tracking_number') as string;
+
+  if (!id || !carrier || !trackingNumber) return;
+
+  try {
+    await sql`
+      UPDATE orders 
+      SET status = 'shipped', carrier = ${carrier}, tracking_number = ${trackingNumber}
+      WHERE id = ${id}
+    `;
+    revalidatePath('/admin');
+    revalidatePath('/orders');
+  } catch (err) {
+    console.error('Error fulfilling order:', err);
+  }
+}

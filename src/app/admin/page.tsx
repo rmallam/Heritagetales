@@ -1,4 +1,4 @@
-import { addItem } from '@/lib/actions';
+import { addItem, fulfillOrder } from '@/lib/actions';
 import { ArrowLeft, Plus, Package } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -13,6 +13,8 @@ type Order = {
   status: string;
   items_json: string;
   created_at: Date;
+  carrier?: string;
+  tracking_number?: string;
 };
 
 export default async function AdminPage() {
@@ -114,7 +116,37 @@ export default async function AdminPage() {
                       </div>
                     </div>
                     <div className="mt-4 pt-4 border-t border-neutral-100">
-                      <p className="text-xs text-neutral-500 mb-2">Customer ID: <span className="font-mono text-neutral-700">{order.user_id}</span></p>
+                      <p className="text-xs text-neutral-500 mb-4">Customer ID: <span className="font-mono text-neutral-700">{order.user_id}</span></p>
+                      
+                      {order.status === 'shipped' ? (
+                        <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+                          <p className="text-xs text-neutral-500 font-medium">Tracking Information</p>
+                          <p className="text-sm font-bold text-neutral-900 mt-1">
+                            {order.carrier}: <span className="font-mono">{order.tracking_number}</span>
+                          </p>
+                        </div>
+                      ) : (
+                        <form action={fulfillOrder} className="flex gap-2">
+                          <input type="hidden" name="id" value={order.id} />
+                          <input 
+                            type="text" 
+                            name="carrier" 
+                            placeholder="Carrier (e.g. AusPost)" 
+                            required 
+                            className="flex-1 text-xs px-3 py-2 rounded-md border border-neutral-300 outline-none focus:border-black"
+                          />
+                          <input 
+                            type="text" 
+                            name="tracking_number" 
+                            placeholder="Tracking #" 
+                            required 
+                            className="flex-1 text-xs px-3 py-2 rounded-md border border-neutral-300 outline-none focus:border-black"
+                          />
+                          <button type="submit" className="px-4 py-2 bg-black text-white text-xs font-bold rounded-md hover:bg-neutral-800">
+                            Mark Shipped
+                          </button>
+                        </form>
+                      )}
                     </div>
                   </div>
                 ))}

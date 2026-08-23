@@ -11,6 +11,8 @@ type Order = {
   status: string;
   items_json: string;
   created_at: Date;
+  carrier?: string;
+  tracking_number?: string;
 };
 
 type Product = { id: number, title: string, image_url: string, price: number };
@@ -38,6 +40,14 @@ export default function OrderCard({ order, itemsDict }: { order: Order, itemsDic
             #{order.stripe_session_id.slice(-8).toUpperCase()}
           </p>
         </div>
+        {order.tracking_number && (
+          <div>
+            <p className="text-sm font-medium text-neutral-500">Tracking</p>
+            <p className="text-sm font-bold text-neutral-900 mt-1">
+              {order.carrier}: <span className="font-mono">{order.tracking_number}</span>
+            </p>
+          </div>
+        )}
       </div>
       
       <div className="px-6 py-6 flex items-center justify-between">
