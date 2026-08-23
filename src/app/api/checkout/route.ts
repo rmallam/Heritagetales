@@ -39,10 +39,23 @@ export async function POST(request: Request) {
       };
     });
 
+    const { getStoreSettings } = await import('@/lib/actions');
+    const settings = await getStoreSettings();
+
+    let discounts = undefined;
+    if (settings.is_sale_active && settings.global_discount > 0) {
+      const coupon = await stripe.coupons.create({
+        percent_off: settings.global_discount,
+        duration: 'once',
+      });
+      discounts = [{ coupon: coupon.id }];
+    }
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items,
       mode: 'payment',
+      discounts,
       success_url: `${origin}/success`,
       cancel_url: `${origin}/`,
       shipping_address_collection: {

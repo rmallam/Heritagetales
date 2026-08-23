@@ -37,11 +37,13 @@ export async function POST(req: Request) {
       const itemsJson = session.metadata?.items_json || '[]';
       const amountTotal = (session.amount_total || 0) / 100;
       const status = 'paid';
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const shippingAddress = (session as any).shipping_details ? JSON.stringify((session as any).shipping_details) : null;
       
       try {
         await sql`
-          INSERT INTO orders (user_id, stripe_session_id, amount_total, status, items_json)
-          VALUES (${userId}, ${session.id}, ${amountTotal}, ${status}, ${itemsJson})
+          INSERT INTO orders (user_id, stripe_session_id, amount_total, status, items_json, shipping_address)
+          VALUES (${userId}, ${session.id}, ${amountTotal}, ${status}, ${itemsJson}, ${shippingAddress})
           ON CONFLICT (stripe_session_id) DO NOTHING;
         `;
         console.log(`✅ Order saved for session: ${session.id}`);

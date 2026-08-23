@@ -15,16 +15,24 @@ export const metadata: Metadata = {
 import { ClerkProvider } from '@clerk/nextjs'
 
 import Footer from '@/components/Footer';
+import { getStoreSettings } from '@/lib/actions';
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const settings = await getStoreSettings();
+
   return (
     <ClerkProvider>
       <html lang="en">
         <body className={`${inter.className} ${playfair.variable} bg-[#fcfcfc] text-[#222222]`}>
+          {settings.is_sale_active && settings.global_discount > 0 && (
+            <div className="bg-black text-white text-center py-2 text-sm font-bold tracking-wide uppercase">
+              Global Sale: {settings.global_discount}% off entire store! Discount applied at checkout.
+            </div>
+          )}
           <Navbar />
           {children}
           <CartDrawer />

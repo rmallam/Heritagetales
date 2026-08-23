@@ -75,3 +75,29 @@ export async function fulfillOrder(formData: FormData) {
     console.error('Error fulfilling order:', err);
   }
 }
+
+export async function getStoreSettings() {
+  try {
+    const { rows } = await sql`SELECT * FROM store_settings WHERE id = 1`;
+    return rows[0] || { global_discount: 0, is_sale_active: false };
+  } catch {
+    return { global_discount: 0, is_sale_active: false };
+  }
+}
+
+export async function updateStoreSettings(formData: FormData) {
+  const isSaleActive = formData.get('is_sale_active') === 'true';
+  const discount = parseFloat(formData.get('global_discount') as string) || 0;
+
+  try {
+    await sql`
+      UPDATE store_settings 
+      SET is_sale_active = ${isSaleActive}, global_discount = ${discount}
+      WHERE id = 1
+    `;
+    revalidatePath('/');
+    revalidatePath('/admin');
+  } catch (err) {
+    console.error('Error updating store settings:', err);
+  }
+}

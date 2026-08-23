@@ -1,4 +1,4 @@
-import { addItem, fulfillOrder } from '@/lib/actions';
+import { addItem, fulfillOrder, getStoreSettings, updateStoreSettings } from '@/lib/actions';
 import { ArrowLeft, Plus, Package } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -15,6 +15,7 @@ type Order = {
   created_at: Date;
   carrier?: string;
   tracking_number?: string;
+  shipping_address?: string;
 };
 
 export default async function AdminPage() {
@@ -34,6 +35,8 @@ export default async function AdminPage() {
     console.error('Error fetching orders:', err);
   }
 
+  const settings = await getStoreSettings();
+
   async function handleSubmit(formData: FormData) {
     'use server';
     await addItem(formData);
@@ -49,9 +52,31 @@ export default async function AdminPage() {
         </Link>
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* Add Item Form */}
-          <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-8 self-start">
-            <div className="mb-8 border-b border-neutral-100 pb-6">
+          <div className="space-y-8">
+            {/* Store Settings Form */}
+            <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-8 self-start">
+              <div className="mb-6 border-b border-neutral-100 pb-4">
+                <h2 className="text-xl font-bold text-neutral-900 tracking-tight">Global Store Settings</h2>
+                <p className="text-sm text-neutral-500 mt-1">Configure site-wide discounts.</p>
+              </div>
+              <form action={updateStoreSettings} className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <label htmlFor="is_sale_active" className="text-sm font-semibold text-neutral-900">Enable Global Sale</label>
+                  <input type="checkbox" id="is_sale_active" name="is_sale_active" value="true" defaultChecked={settings.is_sale_active} className="w-5 h-5 text-black border-neutral-300 rounded focus:ring-black" />
+                </div>
+                <div>
+                  <label htmlFor="global_discount" className="block text-sm font-semibold text-neutral-900 mb-2">Discount Percentage (%)</label>
+                  <input type="number" id="global_discount" name="global_discount" min="0" max="100" defaultValue={settings.global_discount} required className="w-full px-4 py-3 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition-all" />
+                </div>
+                <button type="submit" className="w-full py-3 bg-black text-white rounded-xl font-semibold hover:bg-neutral-800 transition-colors">
+                  Save Settings
+                </button>
+              </form>
+            </div>
+
+            {/* Add Item Form */}
+            <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-8 self-start">
+              <div className="mb-8 border-b border-neutral-100 pb-6">
               <h1 className="text-3xl font-bold text-neutral-900 tracking-tight">Add New Item</h1>
               <p className="text-neutral-500 mt-2">Fill out the details below to instantly add a new brass item to your catalog.</p>
             </div>
@@ -86,6 +111,7 @@ export default async function AdminPage() {
               </button>
             </form>
           </div>
+          </div>
 
           {/* Orders View */}
           <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-8 self-start">
@@ -115,8 +141,26 @@ export default async function AdminPage() {
                         </span>
                       </div>
                     </div>
-                    <div className="mt-4 pt-4 border-t border-neutral-100">
-                      <p className="text-xs text-neutral-500 mb-4">Customer ID: <span className="font-mono text-neutral-700">{order.user_id}</span></p>
+                    <div className="mt-4 pt-4 border-t border-neutral-100 space-y-4">
+                      <p className="text-xs text-neutral-500">Customer ID: <span className="font-mono text-neutral-700">{order.user_id}</span></p>
+                      
+                      {order.shipping_address && (
+                        <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">
+                          <p className="text-xs text-neutral-500 font-medium mb-1">Shipping Details</p>
+                          {(() => {
+                            const addr = JSON.parse(order.shipping_address);
+                            return (
+                              <div className="text-xs text-neutral-800">
+                                <p className="font-bold">{addr.name}</p>
+                                <p>{addr.address?.line1}</p>
+                                {addr.address?.line2 && <p>{addr.address.line2}</p>}
+                                <p>{addr.address?.city}, {addr.address?.state} {addr.address?.postal_code}</p>
+                                <p>{addr.address?.country}</p>
+                              </div>
+                            )
+                          })()}
+                        </div>
+                      )}
                       
                       {order.status === 'shipped' ? (
                         <div className="bg-neutral-50 p-3 rounded-lg border border-neutral-200">

@@ -31,6 +31,16 @@ export async function GET() {
 
     try { await sql`ALTER TABLE orders ADD COLUMN carrier TEXT`; } catch {}
     try { await sql`ALTER TABLE orders ADD COLUMN tracking_number TEXT`; } catch {}
+    try { await sql`ALTER TABLE orders ADD COLUMN shipping_address TEXT`; } catch {}
+
+    await sql`
+      CREATE TABLE IF NOT EXISTS store_settings (
+        id SERIAL PRIMARY KEY,
+        global_discount REAL DEFAULT 0,
+        is_sale_active BOOLEAN DEFAULT false
+      )
+    `;
+    await sql`INSERT INTO store_settings (id, global_discount, is_sale_active) VALUES (1, 0, false) ON CONFLICT DO NOTHING`;
 
     // 2. Clear existing dummy data (optional, but ensures a clean slate)
     await sql`DELETE FROM items`;
