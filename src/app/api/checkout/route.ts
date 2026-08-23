@@ -18,19 +18,26 @@ export async function POST(request: Request) {
 
     const { items }: { items: CartItem[] } = await request.json();
 
-    const line_items = items.map((item) => ({
-      price_data: {
-        currency: 'aud',
-        product_data: {
-          name: item.title,
-          images: item.image_url ? [item.image_url] : [],
-        },
-        unit_amount: Math.round(item.price * 100), // Stripe expects cents
-      },
-      quantity: item.quantity,
-    }));
-
     const origin = request.headers.get('origin') || 'http://localhost:3000';
+
+    const line_items = items.map((item) => {
+      let imageUrl = item.image_url;
+      if (imageUrl && !imageUrl.startsWith('http')) {
+        imageUrl = `${origin}${imageUrl}`;
+      }
+
+      return {
+        price_data: {
+          currency: 'aud',
+          product_data: {
+            name: item.title,
+            images: imageUrl ? [imageUrl] : [],
+          },
+          unit_amount: Math.round(item.price * 100), // Stripe expects cents
+        },
+        quantity: item.quantity,
+      };
+    });
 
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
