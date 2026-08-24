@@ -88,13 +88,15 @@ export async function addItem(formData: FormData) {
 
   const price = parseFloat(priceStr);
   const additional_images = additionalStr ? JSON.stringify(additionalStr.split(',').map(s => s.trim())) : '[]';
+  const variants = formData.get('variants_json') as string || '[]';
 
   try {
     await sql`
-      INSERT INTO items (title, description, price, image_url, additional_images)
-      VALUES (${title}, ${description}, ${price}, ${image_url}, ${additional_images})
+      INSERT INTO items (title, description, price, image_url, additional_images, variants)
+      VALUES (${title}, ${description}, ${price}, ${image_url}, ${additional_images}, ${variants})
     `;
     revalidatePath('/');
+    revalidatePath('/admin/items');
   } catch (error) {
     console.error('Error inserting item:', error);
     throw new Error('Failed to insert item.');
@@ -109,15 +111,43 @@ export async function fulfillOrder(formData: FormData) {
   if (!id || !carrier || !trackingNumber) return;
 
   try {
-    await sql`
+    const { rows } = await sql`
       UPDATE orders 
-      SET status = 'shipped', carrier = ${carrier}, tracking_number = ${trackingNumber}
+      SET status = 'shipped', tracking_number = ${trackingNumber}, carrier = ${carrier}
       WHERE id = ${id}
+      RETURNING customer_email, stripe_session_id
     `;
-    revalidatePath('/admin');
-    revalidatePath('/orders');
-  } catch (err) {
-    console.error('Error fulfilling order:', err);
+    
+    if (rows.length > 0) {
+      const order = rows[0];
+      if (order.customer_email) {
+        try {
+          const { resend, fromEmail } = await import('@/lib/resend');
+          if (process.env.RESEND_API_KEY) {
+            await resend.emails.send({
+              from: fromEmail,
+              to: order.customer_email,
+              subject: 'Your Order Has Shipped! - Heritage Tales',
+              html: `
+                <h1>Good news! Your order is on the way.</h1>
+                <p>Order #${id} has been fulfilled and shipped via ${carrier}.</p>
+                <p><strong>Tracking Number:</strong> ${trackingNumber}</p>
+                <p>Thank you for shopping with Heritage Tales.</p>
+              `
+            });
+            console.log('Shipping confirmation email sent to:', order.customer_email);
+          } else {
+            console.log('[MOCK] Shipping confirmation email would be sent here.');
+          }
+        } catch (e) {
+          console.error('Failed to send shipping confirmation email:', e);
+        }
+      }
+    }
+    
+    revalidatePath('/admin/orders');
+  } catch (error) {
+    console.error('Error fulfilling order:', error);
   }
 }
 
@@ -151,5 +181,30 @@ export async function updateStoreSettings(formData: FormData) {
     revalidatePath('/admin');
   } catch (err) {
     console.error('Error updating store settings:', err);
+  }
+}
+
+export async function syncCart(userId: string | null, email: string | null, itemsJson: string) {
+  if (!email && !userId) return; // Cannot track without identifier
+  
+  try {
+    const { rows } = await sql`
+      SELECT id FROM carts WHERE email = ${email} AND status = 'active'
+    `;
+
+    if (rows.length > 0) {
+      await sql`
+        UPDATE carts 
+        SET items_json = ${itemsJson}, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ${rows[0].id}
+      `;
+    } else {
+      await sql`
+        INSERT INTO carts (user_id, email, items_json)
+        VALUES (${userId}, ${email}, ${itemsJson})
+      `;
+    }
+  } catch (error) {
+    console.error('Failed to sync cart:', error);
   }
 }

@@ -5,6 +5,7 @@ import { X, Minus, Plus, ShoppingBag } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 import { useAuth, useUser, SignInButton } from '@clerk/nextjs';
+import { syncCart } from '@/lib/actions';
 
 export default function CartDrawer({ storeSettings }: { storeSettings?: { is_sale_active: boolean, global_discount: number } }) {
   const { items, isOpen, toggleCart, removeItem, updateQuantity } = useCartStore();
@@ -13,7 +14,15 @@ export default function CartDrawer({ storeSettings }: { storeSettings?: { is_sal
   const { userId } = useAuth();
   const { user } = useUser();
   
-  const email = user?.primaryEmailAddress?.emailAddress;
+  const email = user?.primaryEmailAddress?.emailAddress || null;
+
+  // Sync cart to database when items change, if we have an email/userId
+  useEffect(() => {
+    if (userId || email) {
+      const itemsJson = JSON.stringify(items);
+      syncCart(userId || null, email, itemsJson).catch(console.error);
+    }
+  }, [items, userId, email]);
 
   // Reset auth prompt if drawer closes or user logs in
   useEffect(() => {
@@ -110,14 +119,17 @@ export default function CartDrawer({ storeSettings }: { storeSettings?: { is_sal
                   {items.map((item) => {
                     const discountedPrice = item.price * discountMultiplier;
                     return (
-                      <div key={item.id} className="flex gap-4">
+                      <div key={item.cart_item_id} className="flex gap-4">
                         <div className="w-20 h-20 bg-neutral-100 rounded-md overflow-hidden flex-shrink-0">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           {item.image_url && <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />}
                         </div>
                         <div className="flex flex-col justify-between flex-1">
                           <div>
-                            <h3 className="font-semibold text-neutral-900 line-clamp-1">{item.title}</h3>
+                            <h3 className="font-semibold text-neutral-900 line-clamp-1">
+                              {item.title}
+                              {item.variant_name && <span className="text-neutral-500 font-normal ml-1">({item.variant_name})</span>}
+                            </h3>
                             <div className="flex items-center gap-2">
                               <p className="text-neutral-900 font-medium">${discountedPrice.toFixed(2)}</p>
                               {isSaleActive && (
@@ -128,20 +140,20 @@ export default function CartDrawer({ storeSettings }: { storeSettings?: { is_sal
                           <div className="flex items-center justify-between mt-2">
                             <div className="flex items-center border border-neutral-200 rounded-full">
                               <button 
-                                onClick={() => item.quantity > 1 ? updateQuantity(item.id, item.quantity - 1) : removeItem(item.id)}
+                                onClick={() => item.quantity > 1 ? updateQuantity(item.cart_item_id, item.quantity - 1) : removeItem(item.cart_item_id)}
                                 className="p-1 hover:bg-neutral-100 rounded-l-full text-neutral-600"
                               >
                                 <Minus className="w-4 h-4" />
                               </button>
                               <span className="w-8 text-center text-sm font-medium">{item.quantity}</span>
                               <button 
-                                onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                                onClick={() => updateQuantity(item.cart_item_id, item.quantity + 1)}
                                 className="p-1 hover:bg-neutral-100 rounded-r-full text-neutral-600"
                               >
                                 <Plus className="w-4 h-4" />
                               </button>
                             </div>
-                            <button onClick={() => removeItem(item.id)} className="text-sm text-red-600 hover:underline font-medium">Remove</button>
+                            <button onClick={() => removeItem(item.cart_item_id)} className="text-sm text-red-600 hover:underline font-medium">Remove</button>
                           </div>
                         </div>
                       </div>

@@ -6,7 +6,6 @@ export const dynamic = 'force-dynamic';
 export default async function Home() {
   const items = await getItems();
   const settings = await getStoreSettings();
-  const discount = settings.is_sale_active ? settings.global_discount : 0;
 
   return (
     <main className="min-h-screen bg-[#fcfcfc]">
@@ -47,7 +46,12 @@ export default async function Home() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
             {items.map((item) => (
-              <ProductCard key={item.id} item={item} discount={discount} />
+              <ProductCard 
+                key={item.id} 
+                item={item} 
+                globalDiscount={settings.global_discount} 
+                isSaleActive={settings.is_sale_active} 
+              />
             ))}
           </div>
         )}
