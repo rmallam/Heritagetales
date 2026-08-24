@@ -124,7 +124,7 @@ export async function fulfillOrder(formData: FormData) {
         try {
           const { resend, fromEmail } = await import('@/lib/resend');
           if (process.env.RESEND_API_KEY) {
-            await resend.emails.send({
+            const { data, error } = await resend.emails.send({
               from: fromEmail,
               to: order.customer_email,
               subject: 'Your Order Has Shipped! - Heritage Tales',
@@ -135,7 +135,11 @@ export async function fulfillOrder(formData: FormData) {
                 <p>Thank you for shopping with Heritage Tales.</p>
               `
             });
-            console.log('Shipping confirmation email sent to:', order.customer_email);
+            if (error) {
+              console.error('Resend API Error during Shipping Confirmation:', error);
+            } else {
+              console.log('Shipping confirmation email sent to:', order.customer_email, 'ID:', data?.id);
+            }
           } else {
             console.log('[MOCK] Shipping confirmation email would be sent here.');
           }

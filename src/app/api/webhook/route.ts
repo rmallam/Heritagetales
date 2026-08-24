@@ -66,7 +66,7 @@ export async function POST(req: Request) {
         try {
           const { resend, fromEmail } = await import('@/lib/resend');
           if (process.env.RESEND_API_KEY) {
-            await resend.emails.send({
+            const { data, error } = await resend.emails.send({
               from: fromEmail,
               to: customer_email,
               subject: 'Order Confirmation - Heritage Tales',
@@ -79,7 +79,11 @@ export async function POST(req: Request) {
                 <p><strong>Shipping to:</strong><br/>${shipping_address ? shipping_address.replace(/\\n/g, '<br/>') : 'N/A'}</p>
               `
             });
-            console.log('Order confirmation email sent to:', customer_email);
+            if (error) {
+              console.error('Resend API Error during Order Confirmation:', error);
+            } else {
+              console.log('Order confirmation email sent to:', customer_email, 'ID:', data?.id);
+            }
           } else {
             console.log('[MOCK] Order confirmation email would be sent here, missing API KEY.');
           }

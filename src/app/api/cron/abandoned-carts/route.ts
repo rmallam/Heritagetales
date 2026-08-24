@@ -39,7 +39,7 @@ export async function GET(request: Request) {
       // Send the email
       if (process.env.RESEND_API_KEY) {
         try {
-          await resend.emails.send({
+          const { data, error } = await resend.emails.send({
             from: fromEmail,
             to: cart.email,
             subject: 'You left something behind! - Heritage Tales',
@@ -51,7 +51,13 @@ export async function GET(request: Request) {
               <a href="https://yourdomain.com/" style="padding: 12px 24px; background-color: #000; color: #fff; text-decoration: none; border-radius: 4px; font-weight: bold;">Return to Checkout</a>
             `
           });
-          emailsSent++;
+          
+          if (error) {
+             console.error('Resend API Error during Abandoned Cart Cron:', error);
+          } else {
+             console.log('Abandoned cart email sent to:', cart.email, 'ID:', data?.id);
+             emailsSent++;
+          }
         } catch (e) {
           console.error('Failed to send abandoned cart email to:', cart.email, e);
         }
