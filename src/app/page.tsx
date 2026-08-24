@@ -42,7 +42,7 @@ export default async function Home({ searchParams }: { searchParams: { q?: strin
         {items.length === 0 ? (
           <div className="text-center py-32 bg-white rounded-2xl border border-[#e5e5e5]">
             {searchParams.q ? (
-              <p className="text-[#666666] text-lg">No results found for "{searchParams.q}". Try a different term!</p>
+              <p className="text-[#666666] text-lg">No results found for &quot;{searchParams.q}&quot;. Try a different term!</p>
             ) : (
               <p className="text-[#666666] text-lg">Our collection is currently being curated.</p>
             )}
