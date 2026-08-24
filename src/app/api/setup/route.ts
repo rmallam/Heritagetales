@@ -18,6 +18,7 @@ export async function GET() {
 
     try { await sql`ALTER TABLE items ADD COLUMN is_active BOOLEAN DEFAULT true`; } catch {}
     try { await sql`ALTER TABLE items ADD COLUMN in_stock BOOLEAN DEFAULT true`; } catch {}
+    try { await sql`ALTER TABLE items ADD COLUMN variants JSONB DEFAULT '[]'::jsonb`; } catch {}
 
     // Create the orders table
     await sql`
@@ -35,6 +36,7 @@ export async function GET() {
     try { await sql`ALTER TABLE orders ADD COLUMN carrier TEXT`; } catch {}
     try { await sql`ALTER TABLE orders ADD COLUMN tracking_number TEXT`; } catch {}
     try { await sql`ALTER TABLE orders ADD COLUMN shipping_address TEXT`; } catch {}
+    try { await sql`ALTER TABLE orders ADD COLUMN customer_email TEXT`; } catch {}
 
     await sql`
       CREATE TABLE IF NOT EXISTS store_settings (
@@ -45,49 +47,20 @@ export async function GET() {
     `;
     await sql`INSERT INTO store_settings (id, global_discount, is_sale_active) VALUES (1, 0, false) ON CONFLICT DO NOTHING`;
 
-    // 2. Clear existing dummy data (optional, but ensures a clean slate)
-    await sql`DELETE FROM items`;
+    // Create carts table for abandoned carts
+    await sql`
+      CREATE TABLE IF NOT EXISTS carts (
+        id SERIAL PRIMARY KEY,
+        user_id TEXT,
+        email TEXT,
+        items_json TEXT NOT NULL,
+        status TEXT DEFAULT 'active',
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `;
 
-    // 3. Insert the 4 premium brass items
-    const seedItems = [
-      {
-        title: 'Vintage Brass Miniatures Set',
-        description: 'A beautiful collection of vintage brass miniature items including tiny pitchers, irons, mortar and pestles, and candelabras. Perfect for collectors or unique shelf decor.',
-        price: 125.00,
-        image_url: '/images/miniatures.jpg',
-        additional_images: JSON.stringify([])
-      },
-      {
-        title: 'Golden Brass Deer Figurine',
-        description: 'An elegant, polished golden brass deer figurine. Adds a touch of woodland grace and premium shine to your living room or study.',
-        price: 85.00,
-        image_url: '/images/deer.jpg',
-        additional_images: JSON.stringify([])
-      },
-      {
-        title: 'Antique Brass Measuring Cups Set',
-        description: 'A set of traditional brass measuring cups with loop handles. Can be used as rustic planters, desk organizers, or authentic kitchen decor.',
-        price: 110.00,
-        image_url: '/images/cups.jpg',
-        additional_images: JSON.stringify([])
-      },
-      {
-        title: 'Ornate Brass Dragonfly Decor',
-        description: 'A stunningly detailed brass dragonfly with intricate cut-out wing patterns. Cast beautiful shadows when placed in direct sunlight.',
-        price: 65.00,
-        image_url: '/images/dragonfly.jpg',
-        additional_images: JSON.stringify([])
-      }
-    ];
-
-    for (const item of seedItems) {
-      await sql`
-        INSERT INTO items (title, description, price, image_url, additional_images)
-        VALUES (${item.title}, ${item.description}, ${item.price}, ${item.image_url}, ${item.additional_images})
-      `;
-    }
-
-    return NextResponse.json({ success: true, message: 'Vercel Postgres Database Initialized and Seeded!' });
+    return NextResponse.json({ success: true, message: 'Vercel Postgres Database Schema Patched!' });
   } catch (error: unknown) {
     console.error('Database setup error:', error);
     const msg = error instanceof Error ? error.message : 'Unknown error';
