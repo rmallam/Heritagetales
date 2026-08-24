@@ -66,17 +66,56 @@ export async function POST(req: Request) {
         try {
           const { resend, fromEmail } = await import('@/lib/resend');
           if (process.env.RESEND_API_KEY) {
+            
+            // Format Shipping Address nicely
+            let formattedAddress = 'N/A';
+            if (addressObj && addressObj.address) {
+              const { line1, line2, city, state, postal_code, country } = addressObj.address;
+              formattedAddress = `
+                ${addressObj.name || customer_name}<br/>
+                ${line1}<br/>
+                ${line2 ? line2 + '<br/>' : ''}
+                ${city}, ${state} ${postal_code}<br/>
+                ${country}
+              `;
+            }
+
+            // Format Items nicely
+            let itemsHtml = '';
+            try {
+              const parsedItems = JSON.parse(items_json);
+              itemsHtml = '<ul>' + parsedItems.map((item: any) => 
+                `<li style="margin-bottom: 8px;"><strong>${item.quantity}x ${item.title}</strong> - $${(item.price * item.quantity).toFixed(2)}</li>`
+              ).join('') + '</ul>';
+            } catch (e) {
+              itemsHtml = '<p>Items enclosed in your order.</p>';
+            }
+
             const { data, error } = await resend.emails.send({
               from: fromEmail,
               to: customer_email,
               subject: 'Order Confirmation - Heritage Tales',
               html: `
-                <h1>Thank you for your order, ${customer_name}!</h1>
-                <p>Your order #${orderId} has been successfully placed.</p>
-                <p>We are preparing your premium brassware for shipment. You will receive another email once your order has shipped.</p>
-                <br/>
-                <p><strong>Total:</strong> $${((session.amount_total || 0) / 100).toFixed(2)}</p>
-                <p><strong>Shipping to:</strong><br/>${shipping_address ? shipping_address.replace(/\\n/g, '<br/>') : 'N/A'}</p>
+                <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #222;">
+                  <h1 style="color: #b5955b;">Thank you for your order, ${customer_name}!</h1>
+                  <p style="font-size: 16px;">Your order <strong>#${orderId}</strong> has been successfully placed.</p>
+                  
+                  <div style="background-color: #f8f8f8; padding: 20px; border-radius: 8px; margin: 24px 0;">
+                    <h3 style="margin-top: 0;">Order Summary</h3>
+                    ${itemsHtml}
+                    <hr style="border: none; border-top: 1px solid #ddd; margin: 16px 0;" />
+                    <p style="font-size: 18px; margin: 0;"><strong>Total Paid:</strong> $${((session.amount_total || 0) / 100).toFixed(2)}</p>
+                  </div>
+
+                  <div style="margin-bottom: 32px;">
+                    <h3>Shipping To:</h3>
+                    <p style="background-color: #fff; padding: 16px; border: 1px solid #eee; border-radius: 8px;">
+                      ${formattedAddress}
+                    </p>
+                  </div>
+
+                  <p style="font-size: 15px; color: #666;">We are preparing your premium brassware for shipment. You will receive another email with a tracking number once your order has shipped.</p>
+                </div>
               `
             });
             if (error) {
