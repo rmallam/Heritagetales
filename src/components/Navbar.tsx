@@ -34,14 +34,17 @@ export default function Navbar() {
           </h1>
         </Link>
         <nav className="flex space-x-6 items-center">
-          <div className="hidden md:flex relative mr-4">
+          <form action="/" className="hidden md:flex relative mr-4">
             <input 
+              name="q"
               type="text" 
               placeholder="Search brassware..." 
               className="pl-4 pr-10 py-2 rounded-full border border-neutral-300 bg-neutral-50 focus:bg-white focus:ring-2 focus:ring-[#b5955b] outline-none text-sm w-64 transition-all"
             />
-            <Search className="w-4 h-4 text-neutral-400 absolute right-3 top-3 pointer-events-none" />
-          </div>
+            <button type="submit" className="absolute right-3 top-2.5">
+              <Search className="w-4 h-4 text-neutral-400 hover:text-[#b5955b] transition-colors" />
+            </button>
+          </form>
 
           {isAdmin && (
             <Link href="/admin" className="text-sm font-semibold text-[#666666] hover:text-[#222222] transition-colors tracking-wide uppercase hidden sm:block">

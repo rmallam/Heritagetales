@@ -10,8 +10,18 @@ export async function checkIsAdmin() {
   return userId && userId === process.env.ADMIN_USER_ID;
 }
 
-export async function getItems(): Promise<Item[]> {
+export async function getItems(searchQuery?: string): Promise<Item[]> {
   try {
+    if (searchQuery) {
+      const qs = `%${searchQuery}%`;
+      const { rows } = await sql<Item>`
+        SELECT * FROM items 
+        WHERE is_active = true 
+        AND (title ILIKE ${qs} OR description ILIKE ${qs})
+        ORDER BY created_at DESC
+      `;
+      return rows;
+    }
     const { rows } = await sql<Item>`SELECT * FROM items WHERE is_active = true ORDER BY created_at DESC`;
     return rows;
   } catch (error) {

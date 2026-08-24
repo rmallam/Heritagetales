@@ -3,8 +3,8 @@ import ProductCard from '@/components/ProductCard';
 
 export const dynamic = 'force-dynamic';
 
-export default async function Home() {
-  const items = await getItems();
+export default async function Home({ searchParams }: { searchParams: { q?: string } }) {
+  const items = await getItems(searchParams.q);
   const settings = await getStoreSettings();
 
   return (
@@ -41,7 +41,11 @@ export default async function Home() {
 
         {items.length === 0 ? (
           <div className="text-center py-32 bg-white rounded-2xl border border-[#e5e5e5]">
-            <p className="text-[#666666] text-lg">Our collection is currently being curated.</p>
+            {searchParams.q ? (
+              <p className="text-[#666666] text-lg">No results found for "{searchParams.q}". Try a different term!</p>
+            ) : (
+              <p className="text-[#666666] text-lg">Our collection is currently being curated.</p>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-10">
