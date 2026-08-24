@@ -15,7 +15,8 @@ export default function AddToCartButton({ item }: { item: Item }) {
   const [selectedVariant, setSelectedVariant] = useState(variants.length > 0 ? variants[0] : null);
 
   const price = selectedVariant ? selectedVariant.price : item.price;
-  const inStock = selectedVariant ? selectedVariant.in_stock : item.in_stock;
+  const stockCount = selectedVariant ? selectedVariant.stock_count : item.stock_count;
+  const inStock = stockCount > 0;
 
   const handleAdd = () => {
     if (!inStock) return;
@@ -35,11 +36,21 @@ export default function AddToCartButton({ item }: { item: Item }) {
             onChange={(e) => setSelectedVariant(variants.find(v => v.name === e.target.value) || null)}
           >
             {variants.map((v) => (
-              <option key={v.name} value={v.name} disabled={!v.in_stock}>
-                {v.name} - ${v.price.toFixed(2)} {!v.in_stock && '(Out of Stock)'}
+              <option key={v.name} value={v.name} disabled={v.stock_count <= 0}>
+                {v.name} - ${v.price.toFixed(2)} {v.stock_count <= 0 && '(Out of Stock)'}
               </option>
             ))}
           </select>
+        </div>
+      )}
+      
+      {inStock && stockCount <= 5 && (
+        <div className="text-sm font-semibold text-orange-600 flex items-center">
+          <span className="relative flex h-3 w-3 mr-2">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-orange-400 opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-orange-500"></span>
+          </span>
+          Hurry! Only {stockCount} left in stock.
         </div>
       )}
       

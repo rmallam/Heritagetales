@@ -99,17 +99,28 @@ export async function addItem(formData: FormData) {
   const price = parseFloat(priceStr);
   const additional_images = additionalStr ? JSON.stringify(additionalStr.split(',').map(s => s.trim())) : '[]';
   const variants = formData.get('variants_json') as string || '[]';
+  const stockCount = parseInt(formData.get('stock_count') as string) || 10;
 
   try {
     await sql`
-      INSERT INTO items (title, description, price, image_url, additional_images, variants)
-      VALUES (${title}, ${description}, ${price}, ${image_url}, ${additional_images}, ${variants})
+      INSERT INTO items (title, description, price, image_url, additional_images, variants, stock_count)
+      VALUES (${title}, ${description}, ${price}, ${image_url}, ${additional_images}, ${variants}, ${stockCount})
     `;
     revalidatePath('/');
     revalidatePath('/admin/items');
   } catch (error) {
     console.error('Error inserting item:', error);
     throw new Error('Failed to insert item.');
+  }
+}
+
+export async function updateItemStock(id: number, newStock: number) {
+  try {
+    await sql`UPDATE items SET stock_count = ${newStock} WHERE id = ${id}`;
+    revalidatePath('/');
+    revalidatePath('/admin/items');
+  } catch (e) {
+    console.error(e);
   }
 }
 

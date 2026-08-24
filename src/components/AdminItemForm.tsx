@@ -8,13 +8,13 @@ import { useRouter } from 'next/navigation';
 export default function AdminItemForm() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [variants, setVariants] = useState<{ name: string, price: number, in_stock: boolean }[]>([]);
+  const [variants, setVariants] = useState<{ name: string, price: number, stock_count: number }[]>([]);
 
   const addVariant = () => {
-    setVariants([...variants, { name: '', price: 0, in_stock: true }]);
+    setVariants([...variants, { name: '', price: 0, stock_count: 10 }]);
   };
 
-  const updateVariant = (index: number, field: string, value: string | number | boolean) => {
+  const updateVariant = (index: number, field: string, value: string | number) => {
     const newVariants = [...variants];
     newVariants[index] = { ...newVariants[index], [field]: value };
     setVariants(newVariants);
@@ -46,11 +46,17 @@ export default function AdminItemForm() {
         <label htmlFor="title" className="block text-sm font-semibold text-neutral-900 mb-2">Item Title</label>
         <input type="text" id="title" name="title" required className="w-full px-4 py-3 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition-all" placeholder="e.g. Solid Brass Urli" />
       </div>
-      <div>
-        <label htmlFor="price" className="block text-sm font-semibold text-neutral-900 mb-2">Base Price (AUD)</label>
-        <div className="relative">
-          <span className="absolute left-4 top-3 text-neutral-500">$</span>
-          <input type="number" id="price" name="price" step="0.01" required className="w-full pl-8 pr-4 py-3 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition-all" placeholder="85.00" />
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="price" className="block text-sm font-semibold text-neutral-900 mb-2">Base Price (AUD)</label>
+          <div className="relative">
+            <span className="absolute left-4 top-3 text-neutral-500">$</span>
+            <input type="number" id="price" name="price" step="0.01" required className="w-full pl-8 pr-4 py-3 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition-all" placeholder="85.00" />
+          </div>
+        </div>
+        <div>
+          <label htmlFor="stock_count" className="block text-sm font-semibold text-neutral-900 mb-2">Base Stock Quantity</label>
+          <input type="number" id="stock_count" name="stock_count" required defaultValue="10" min="0" className="w-full px-4 py-3 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition-all" />
         </div>
       </div>
       <div>
@@ -89,16 +95,23 @@ export default function AdminItemForm() {
                     required
                   />
                 </div>
-                <label className="flex items-center text-sm text-neutral-600 gap-1">
-                  <input type="checkbox" checked={v.in_stock} onChange={(e) => updateVariant(i, 'in_stock', e.target.checked)} />
-                  Stock
-                </label>
+                <div className="relative w-24">
+                  <input 
+                    type="number"
+                    min="0"
+                    placeholder="Qty"
+                    value={v.stock_count} 
+                    onChange={(e) => updateVariant(i, 'stock_count', parseInt(e.target.value) || 0)}
+                    className="w-full px-3 py-2 border border-neutral-300 rounded focus:border-black outline-none text-sm"
+                    required
+                  />
+                </div>
                 <button type="button" onClick={() => removeVariant(i)} className="p-2 text-red-500 hover:bg-red-50 rounded">
                   <X className="w-4 h-4" />
                 </button>
               </div>
             ))}
-            <p className="text-xs text-neutral-500 mt-2">Note: If variants are added, the base price above is ignored on the product card.</p>
+            <p className="text-xs text-neutral-500 mt-2">Note: If variants are added, the base price and stock above are ignored on the product card.</p>
           </div>
         )}
       </div>

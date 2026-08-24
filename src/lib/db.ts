@@ -1,7 +1,7 @@
 export interface Variant {
   name: string;
   price: number;
-  in_stock: boolean;
+  stock_count: number;
 }
 
 export interface Item {
@@ -13,6 +13,6 @@ export interface Item {
   additional_images: string; // JSON string array
   variants: Variant[];
   is_active: boolean;
-  in_stock: boolean;
+  stock_count: number;
   created_at: string;
 }

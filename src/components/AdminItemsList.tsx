@@ -1,7 +1,7 @@
 'use client';
 
 import { Item } from '@/lib/db';
-import { toggleItemStock, toggleItemActive } from '@/lib/actions';
+import { updateItemStock, toggleItemActive } from '@/lib/actions';
 import { Package, ArchiveRestore, Trash2 } from 'lucide-react';
 import { useTransition } from 'react';
 
@@ -32,23 +32,34 @@ export default function AdminItemsList({ items }: { items: Item[] }) {
                 <div className="flex gap-2 mt-1">
                   {!item.is_active ? (
                     <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">Archived</span>
-                  ) : item.in_stock ? (
+                  ) : item.stock_count > 5 ? (
                     <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-green-100 text-green-700">In Stock</span>
+                  ) : item.stock_count > 0 ? (
+                    <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">Low Stock</span>
                   ) : (
-                    <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-orange-100 text-orange-700">Out of Stock</span>
+                    <span className="text-[10px] uppercase tracking-wider font-bold px-2 py-0.5 rounded-full bg-red-100 text-red-700">Out of Stock</span>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-2">
-              <button
-                disabled={isPending || !item.is_active}
-                onClick={() => startTransition(() => toggleItemStock(item.id, item.in_stock))}
-                className="px-3 py-2 text-xs font-semibold rounded-lg bg-neutral-100 text-neutral-700 hover:bg-neutral-200 disabled:opacity-50 transition-colors"
-              >
-                {item.in_stock ? 'Mark Out of Stock' : 'Mark In Stock'}
-              </button>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <label className="text-xs font-semibold text-neutral-500 uppercase tracking-wider">Qty</label>
+                <input 
+                  type="number" 
+                  min="0"
+                  defaultValue={item.stock_count}
+                  onBlur={(e) => {
+                    const val = parseInt(e.target.value);
+                    if (!isNaN(val) && val !== item.stock_count) {
+                      startTransition(() => updateItemStock(item.id, val));
+                    }
+                  }}
+                  className="w-16 px-2 py-1 text-sm border border-neutral-300 rounded focus:border-black outline-none"
+                  disabled={isPending || !item.is_active}
+                />
+              </div>
               <button
                 disabled={isPending}
                 onClick={() => startTransition(() => toggleItemActive(item.id, item.is_active))}

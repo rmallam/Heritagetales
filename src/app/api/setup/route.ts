@@ -19,6 +19,7 @@ export async function GET() {
     try { await sql`ALTER TABLE items ADD COLUMN is_active BOOLEAN DEFAULT true`; } catch {}
     try { await sql`ALTER TABLE items ADD COLUMN in_stock BOOLEAN DEFAULT true`; } catch {}
     try { await sql`ALTER TABLE items ADD COLUMN variants JSONB DEFAULT '[]'::jsonb`; } catch {}
+    try { await sql`ALTER TABLE items ADD COLUMN stock_count INTEGER DEFAULT 10`; } catch {}
 
     // Create the orders table
     await sql`

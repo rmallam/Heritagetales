@@ -141,6 +141,22 @@ export async function POST(req: Request) {
           console.error('Failed to update cart status:', e);
         }
 
+        // Decrement Inventory Stock
+        try {
+          const parsedItems = JSON.parse(items_json);
+          for (const item of parsedItems) {
+            if (item.id) {
+              await sql`
+                UPDATE items 
+                SET stock_count = GREATEST(stock_count - ${item.quantity || 1}, 0)
+                WHERE id = ${item.id}
+              `;
+            }
+          }
+        } catch (e) {
+          console.error('Failed to decrement inventory:', e);
+        }
+
         console.log(`✅ Order saved for session: ${session.id}`);
       } catch (err) {
         console.error('Error saving order to database:', err);

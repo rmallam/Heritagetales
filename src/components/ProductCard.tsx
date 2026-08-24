@@ -11,7 +11,8 @@ export default function ProductCard({ item, globalDiscount = 0, isSaleActive = f
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(item.variants && item.variants.length > 0 ? item.variants[0] : null);
 
   const price = selectedVariant ? selectedVariant.price : item.price;
-  const inStock = selectedVariant ? selectedVariant.in_stock : item.in_stock;
+  const stockCount = selectedVariant ? selectedVariant.stock_count : item.stock_count;
+  const inStock = stockCount > 0;
   
   const discountMultiplier = isSaleActive ? (100 - globalDiscount) / 100 : 1;
   const displayPrice = price * discountMultiplier;
@@ -30,6 +31,11 @@ export default function ProductCard({ item, globalDiscount = 0, isSaleActive = f
         {!inStock && (
           <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 text-xs font-bold uppercase tracking-wider text-neutral-500 rounded-full">
             Out of Stock
+          </div>
+        )}
+        {inStock && stockCount <= 5 && (
+          <div className="absolute top-4 right-4 bg-orange-100/90 backdrop-blur-sm px-3 py-1 text-xs font-bold uppercase tracking-wider text-orange-700 rounded-full">
+            Only {stockCount} left!
           </div>
         )}
         {isSaleActive && inStock && (
@@ -54,8 +60,8 @@ export default function ProductCard({ item, globalDiscount = 0, isSaleActive = f
               onChange={(e) => setSelectedVariant(item.variants.find(v => v.name === e.target.value) || null)}
             >
               {item.variants.map((v) => (
-                <option key={v.name} value={v.name} disabled={!v.in_stock}>
-                  {v.name} {!v.in_stock && '(Out of Stock)'}
+                <option key={v.name} value={v.name} disabled={v.stock_count <= 0}>
+                  {v.name} {v.stock_count <= 0 && '(Out of Stock)'}
                 </option>
               ))}
             </select>
