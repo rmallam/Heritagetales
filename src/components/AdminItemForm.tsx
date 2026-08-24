@@ -63,6 +63,11 @@ export default function AdminItemForm() {
         <label htmlFor="image_file" className="block text-sm font-semibold text-neutral-900 mb-2">Primary Image (Upload File)</label>
         <input type="file" id="image_file" name="image_file" accept="image/*" className="w-full px-4 py-3 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition-all bg-white" />
       </div>
+      <div>
+        <label htmlFor="tags" className="block text-sm font-semibold text-neutral-900 mb-2">Tags (comma separated)</label>
+        <input type="text" id="tags" name="tags" className="w-full px-4 py-3 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition-all" placeholder="e.g. Urli, Decor, Gift" />
+        <p className="text-xs text-neutral-500 mt-2">These tags are used for automatic discounts.</p>
+      </div>
       
       {/* Variants Section */}
       <div className="p-4 bg-neutral-50 rounded-xl border border-neutral-200">

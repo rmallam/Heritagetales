@@ -1,12 +1,12 @@
 'use client';
 
-import { Item, Variant } from '@/lib/db';
+import { Item, Variant, DiscountRule } from '@/lib/db';
 import { useCartStore } from '@/lib/store';
 import { Package } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 
-export default function ProductCard({ item, globalDiscount = 0, isSaleActive = false }: { item: Item, globalDiscount?: number, isSaleActive?: boolean }) {
+export default function ProductCard({ item, globalDiscount = 0, isSaleActive = false, discountRules = [] }: { item: Item, globalDiscount?: number, isSaleActive?: boolean, discountRules?: DiscountRule[] }) {
   const addItem = useCartStore((state) => state.addItem);
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(item.variants && item.variants.length > 0 ? item.variants[0] : null);
 
@@ -14,7 +14,23 @@ export default function ProductCard({ item, globalDiscount = 0, isSaleActive = f
   const stockCount = selectedVariant ? selectedVariant.stock_count : item.stock_count;
   const inStock = stockCount > 0;
   
-  const discountMultiplier = isSaleActive ? (100 - globalDiscount) / 100 : 1;
+  // Calculate best discount
+  let bestDiscount = isSaleActive ? globalDiscount : 0;
+  let saleReason = isSaleActive ? 'Sale' : '';
+
+  if (!isSaleActive && item.tags && item.tags.length > 0) {
+    const activeRules = discountRules.filter(r => r.is_active);
+    for (const tag of item.tags) {
+      const match = activeRules.find(r => r.tag.toLowerCase() === tag.toLowerCase());
+      if (match && match.discount_percentage > bestDiscount) {
+        bestDiscount = match.discount_percentage;
+        saleReason = `${match.tag} Sale`;
+      }
+    }
+  }
+
+  const isDiscounted = bestDiscount > 0;
+  const discountMultiplier = isDiscounted ? (100 - bestDiscount) / 100 : 1;
   const displayPrice = price * discountMultiplier;
 
   return (
@@ -38,9 +54,9 @@ export default function ProductCard({ item, globalDiscount = 0, isSaleActive = f
             Only {stockCount} left!
           </div>
         )}
-        {isSaleActive && inStock && (
+        {isDiscounted && inStock && (
           <div className="absolute top-4 left-4 bg-[#b5955b] text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full shadow-md">
-            Sale -{globalDiscount}%
+            {saleReason} -{bestDiscount}%
           </div>
         )}
       </Link>
@@ -71,13 +87,13 @@ export default function ProductCard({ item, globalDiscount = 0, isSaleActive = f
         <div className="flex items-center justify-between pt-4 border-t border-neutral-100">
           <div className="flex flex-col">
             <span className="text-xl font-bold text-neutral-900">${displayPrice.toFixed(2)}</span>
-            {isSaleActive && (
+            {isDiscounted && (
               <span className="text-xs text-neutral-400 line-through">${price.toFixed(2)}</span>
             )}
           </div>
           <button 
             disabled={!inStock}
-            onClick={() => inStock && addItem(item, selectedVariant?.name, price)}
+            onClick={() => inStock && addItem(item, selectedVariant?.name, displayPrice)}
             className={`px-6 py-2.5 text-white text-sm font-semibold rounded-full transition-colors shadow-md ${!inStock ? 'bg-neutral-400 cursor-not-allowed' : 'bg-[#222222] hover:bg-[#b5955b]'}`}
           >
             {!inStock ? 'Out of Stock' : 'Add to Cart'}

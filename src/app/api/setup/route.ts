@@ -20,6 +20,17 @@ export async function GET() {
     try { await sql`ALTER TABLE items ADD COLUMN in_stock BOOLEAN DEFAULT true`; } catch {}
     try { await sql`ALTER TABLE items ADD COLUMN variants JSONB DEFAULT '[]'::jsonb`; } catch {}
     try { await sql`ALTER TABLE items ADD COLUMN stock_count INTEGER DEFAULT 10`; } catch {}
+    try { await sql`ALTER TABLE items ADD COLUMN tags JSONB DEFAULT '[]'::jsonb`; } catch {}
+
+    // Create the discount rules table
+    await sql`
+      CREATE TABLE IF NOT EXISTS discount_rules (
+        id SERIAL PRIMARY KEY,
+        tag VARCHAR(255) UNIQUE NOT NULL,
+        discount_percentage INTEGER NOT NULL,
+        is_active BOOLEAN DEFAULT true
+      );
+    `;
 
     // Create the orders table
     await sql`

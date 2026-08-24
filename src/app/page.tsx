@@ -1,4 +1,4 @@
-import { getItems, getStoreSettings } from '@/lib/actions';
+import { getItems, getStoreSettings, getDiscountRules } from '@/lib/actions';
 import ProductCard from '@/components/ProductCard';
 
 export const dynamic = 'force-dynamic';
@@ -6,6 +6,7 @@ export const dynamic = 'force-dynamic';
 export default async function Home({ searchParams }: { searchParams: { q?: string } }) {
   const items = await getItems(searchParams.q);
   const settings = await getStoreSettings();
+  const rules = await getDiscountRules();
 
   return (
     <main className="min-h-screen bg-[#fcfcfc]">
@@ -55,6 +56,7 @@ export default async function Home({ searchParams }: { searchParams: { q?: strin
                 item={item} 
                 globalDiscount={settings.global_discount} 
                 isSaleActive={settings.is_sale_active} 
+                discountRules={rules}
               />
             ))}
           </div>

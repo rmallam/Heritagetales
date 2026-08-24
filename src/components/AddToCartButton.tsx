@@ -1,16 +1,24 @@
 'use client';
 
 import { useCartStore } from '@/lib/store';
-import { Item } from '@/lib/db';
+import { Item, DiscountRule } from '@/lib/db';
 import { ShoppingBag } from 'lucide-react';
 import { useState } from 'react';
 
-export default function AddToCartButton({ item }: { item: Item }) {
+export default function AddToCartButton({ 
+  item, 
+  globalDiscount = 0, 
+  isSaleActive = false, 
+  discountRules = [] 
+}: { 
+  item: Item, 
+  globalDiscount?: number, 
+  isSaleActive?: boolean, 
+  discountRules?: DiscountRule[] 
+}) {
   const addItem = useCartStore((state) => state.addItem);
   const [added, setAdded] = useState(false);
   
-  // Need to use item.variants, which might be a string if not parsed properly by Postgres, 
-  // but DB returns it as parsed JSON if column is JSONB. Let's assume it's an array.
   const variants = item.variants || [];
   const [selectedVariant, setSelectedVariant] = useState(variants.length > 0 ? variants[0] : null);
 
@@ -18,9 +26,23 @@ export default function AddToCartButton({ item }: { item: Item }) {
   const stockCount = selectedVariant ? selectedVariant.stock_count : item.stock_count;
   const inStock = stockCount > 0;
 
+  // Calculate best discount
+  let bestDiscount = isSaleActive ? globalDiscount : 0;
+  if (!isSaleActive && item.tags && item.tags.length > 0) {
+    const activeRules = discountRules.filter(r => r.is_active);
+    for (const tag of item.tags) {
+      const match = activeRules.find(r => r.tag.toLowerCase() === tag.toLowerCase());
+      if (match && match.discount_percentage > bestDiscount) {
+        bestDiscount = match.discount_percentage;
+      }
+    }
+  }
+  
+  const displayPrice = price * (bestDiscount > 0 ? (100 - bestDiscount) / 100 : 1);
+
   const handleAdd = () => {
     if (!inStock) return;
-    addItem(item, selectedVariant?.name, price);
+    addItem(item, selectedVariant?.name, displayPrice);
     setAdded(true);
     setTimeout(() => setAdded(false), 2000);
   };
@@ -35,11 +57,14 @@ export default function AddToCartButton({ item }: { item: Item }) {
             value={selectedVariant?.name || ''}
             onChange={(e) => setSelectedVariant(variants.find(v => v.name === e.target.value) || null)}
           >
-            {variants.map((v) => (
-              <option key={v.name} value={v.name} disabled={v.stock_count <= 0}>
-                {v.name} - ${v.price.toFixed(2)} {v.stock_count <= 0 && '(Out of Stock)'}
-              </option>
-            ))}
+            {variants.map((v) => {
+              const vPrice = v.price * (bestDiscount > 0 ? (100 - bestDiscount) / 100 : 1);
+              return (
+                <option key={v.name} value={v.name} disabled={v.stock_count <= 0}>
+                  {v.name} - ${vPrice.toFixed(2)} {v.stock_count <= 0 && '(Out of Stock)'}
+                </option>
+              );
+            })}
           </select>
         </div>
       )}

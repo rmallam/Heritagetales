@@ -1,9 +1,11 @@
-import { getStoreSettings, updateStoreSettings } from '@/lib/actions';
+import { getStoreSettings, updateStoreSettings, getDiscountRules } from '@/lib/actions';
+import AdminDiscountRules from '@/components/AdminDiscountRules';
 
 export const dynamic = 'force-dynamic';
 
 export default async function AdminSettingsPage() {
   const settings = await getStoreSettings();
+  const rules = await getDiscountRules();
 
   return (
     <div className="p-6 md:p-12 max-w-3xl">
@@ -12,7 +14,7 @@ export default async function AdminSettingsPage() {
         <p className="text-neutral-500 mt-2">Configure site-wide discounts and other store operations.</p>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-8">
+      <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-8 mb-8">
         <h2 className="text-xl font-bold text-neutral-900 tracking-tight mb-6">Global Sale Details</h2>
         <form action={updateStoreSettings} className="space-y-6">
           <div className="flex items-center justify-between p-4 bg-neutral-50 rounded-lg border border-neutral-200">
@@ -31,6 +33,14 @@ export default async function AdminSettingsPage() {
             Save Settings
           </button>
         </form>
+      </div>
+
+      <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-8">
+        <div className="mb-6">
+          <h2 className="text-xl font-bold text-neutral-900 tracking-tight">Tag-Based Discounts</h2>
+          <p className="text-sm text-neutral-500 mt-1">Create rules to automatically discount items carrying specific tags.</p>
+        </div>
+        <AdminDiscountRules rules={rules} />
       </div>
     </div>
   );

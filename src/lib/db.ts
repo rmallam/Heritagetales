@@ -12,7 +12,15 @@ export interface Item {
   image_url: string;
   additional_images: string; // JSON string array
   variants: Variant[];
+  tags: string[];
   is_active: boolean;
   stock_count: number;
   created_at: string;
+}
+
+export interface DiscountRule {
+  id: number;
+  tag: string;
+  discount_percentage: number;
+  is_active: boolean;
 }

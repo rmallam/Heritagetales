@@ -1,4 +1,4 @@
-import { getItem } from '@/lib/actions';
+import { getItem, getStoreSettings, getDiscountRules } from '@/lib/actions';
 import { notFound } from 'next/navigation';
 import Gallery from '@/components/Gallery';
 import AddToCartButton from '@/components/AddToCartButton';
@@ -9,6 +9,8 @@ export const dynamic = 'force-dynamic';
 
 export default async function ProductPage({ params }: { params: { id: string } }) {
   const item = await getItem(params.id);
+  const settings = await getStoreSettings();
+  const rules = await getDiscountRules();
 
   if (!item) {
     notFound();
@@ -25,6 +27,25 @@ export default async function ProductPage({ params }: { params: { id: string } }
     console.error("Failed to parse additional images", e);
   }
 
+  // Calculate best discount
+  let bestDiscount = settings.is_sale_active ? settings.global_discount : 0;
+  let saleReason = settings.is_sale_active ? 'Sale' : '';
+
+  if (!settings.is_sale_active && item.tags && item.tags.length > 0) {
+    const activeRules = rules.filter(r => r.is_active);
+    for (const tag of item.tags) {
+      const match = activeRules.find(r => r.tag.toLowerCase() === tag.toLowerCase());
+      if (match && match.discount_percentage > bestDiscount) {
+        bestDiscount = match.discount_percentage;
+        saleReason = `${match.tag} Sale`;
+      }
+    }
+  }
+
+  const isDiscounted = bestDiscount > 0;
+  const discountMultiplier = isDiscounted ? (100 - bestDiscount) / 100 : 1;
+  const displayPrice = item.price * discountMultiplier;
+
   return (
     <div className="min-h-screen bg-[#fcfcfc] py-12 px-6">
       <div className="max-w-7xl mx-auto">
@@ -35,14 +56,24 @@ export default async function ProductPage({ params }: { params: { id: string } }
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-24">
           {/* Gallery Side */}
-          <div className="w-full">
+          <div className="w-full relative">
+            {isDiscounted && (
+              <div className="absolute top-4 left-4 z-10 bg-[#b5955b] text-white px-4 py-2 text-sm font-bold uppercase tracking-wider rounded-full shadow-lg">
+                {saleReason} -{bestDiscount}%
+              </div>
+            )}
             <Gallery images={allImages} />
           </div>
 
           {/* Details Side */}
           <div className="flex flex-col pt-4">
             <h1 className="text-4xl md:text-5xl font-bold text-[#222222] font-serif mb-4 leading-tight">{item.title}</h1>
-            <span className="text-3xl font-bold text-[#b5955b] mb-8">${item.price.toFixed(2)} AUD</span>
+            <div className="mb-8 flex items-end gap-3">
+              <span className="text-3xl font-bold text-[#b5955b]">${displayPrice.toFixed(2)} AUD</span>
+              {isDiscounted && (
+                <span className="text-xl text-neutral-400 line-through mb-1">${item.price.toFixed(2)}</span>
+              )}
+            </div>
             
             <div className="prose prose-neutral mb-10">
               <p className="text-lg text-[#666666] leading-relaxed whitespace-pre-wrap">{item.description}</p>
@@ -55,7 +86,12 @@ export default async function ProductPage({ params }: { params: { id: string } }
               </p>
             </div>
 
-            <AddToCartButton item={item} />
+            <AddToCartButton 
+              item={item} 
+              globalDiscount={settings.global_discount} 
+              isSaleActive={settings.is_sale_active} 
+              discountRules={rules} 
+            />
           </div>
         </div>
       </div>

@@ -100,11 +100,14 @@ export async function addItem(formData: FormData) {
   const additional_images = additionalStr ? JSON.stringify(additionalStr.split(',').map(s => s.trim())) : '[]';
   const variants = formData.get('variants_json') as string || '[]';
   const stockCount = parseInt(formData.get('stock_count') as string) || 10;
+  
+  const tagsStr = formData.get('tags') as string || '';
+  const tags = JSON.stringify(tagsStr.split(',').map(t => t.trim()).filter(Boolean));
 
   try {
     await sql`
-      INSERT INTO items (title, description, price, image_url, additional_images, variants, stock_count)
-      VALUES (${title}, ${description}, ${price}, ${image_url}, ${additional_images}, ${variants}, ${stockCount})
+      INSERT INTO items (title, description, price, image_url, additional_images, variants, stock_count, tags)
+      VALUES (${title}, ${description}, ${price}, ${image_url}, ${additional_images}, ${variants}, ${stockCount}, ${tags})
     `;
     revalidatePath('/');
     revalidatePath('/admin/items');
@@ -231,5 +234,56 @@ export async function syncCart(userId: string | null, email: string | null, item
     }
   } catch (error) {
     console.error('Failed to sync cart:', error);
+  }
+}
+
+import { DiscountRule } from './db';
+
+export async function getDiscountRules(): Promise<DiscountRule[]> {
+  try {
+    const { rows } = await sql<DiscountRule>`SELECT * FROM discount_rules ORDER BY id DESC`;
+    return rows;
+  } catch (error) {
+    console.error('Error fetching discount rules:', error);
+    return [];
+  }
+}
+
+export async function addDiscountRule(formData: FormData) {
+  const tag = formData.get('tag') as string;
+  const discount = parseInt(formData.get('discount_percentage') as string);
+  
+  if (!tag || isNaN(discount)) return;
+
+  try {
+    await sql`
+      INSERT INTO discount_rules (tag, discount_percentage)
+      VALUES (${tag}, ${discount})
+      ON CONFLICT (tag) DO UPDATE SET discount_percentage = EXCLUDED.discount_percentage
+    `;
+    revalidatePath('/');
+    revalidatePath('/admin');
+  } catch (error) {
+    console.error('Error inserting discount rule:', error);
+  }
+}
+
+export async function toggleDiscountRule(id: number, currentActive: boolean) {
+  try {
+    await sql`UPDATE discount_rules SET is_active = ${!currentActive} WHERE id = ${id}`;
+    revalidatePath('/');
+    revalidatePath('/admin');
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function deleteDiscountRule(id: number) {
+  try {
+    await sql`DELETE FROM discount_rules WHERE id = ${id}`;
+    revalidatePath('/');
+    revalidatePath('/admin');
+  } catch (e) {
+    console.error(e);
   }
 }
