@@ -84,10 +84,11 @@ export async function POST(req: Request) {
             let itemsHtml = '';
             try {
               const parsedItems = JSON.parse(items_json);
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               itemsHtml = '<ul>' + parsedItems.map((item: any) => 
                 `<li style="margin-bottom: 8px;"><strong>${item.quantity}x ${item.title}</strong> - $${(item.price * item.quantity).toFixed(2)}</li>`
               ).join('') + '</ul>';
-            } catch (e) {
+            } catch {
               itemsHtml = '<p>Items enclosed in your order.</p>';
             }
 
