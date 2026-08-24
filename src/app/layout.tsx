@@ -35,7 +35,7 @@ export default async function RootLayout({
           )}
           <Navbar />
           {children}
-          <CartDrawer />
+          <CartDrawer storeSettings={settings} />
           <Footer />
         </body>
       </html>

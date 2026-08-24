@@ -121,10 +121,17 @@ export async function fulfillOrder(formData: FormData) {
   }
 }
 
-export async function getStoreSettings() {
+export async function getStoreSettings(): Promise<{ global_discount: number, is_sale_active: boolean }> {
   try {
     const { rows } = await sql`SELECT * FROM store_settings WHERE id = 1`;
-    return rows[0] || { global_discount: 0, is_sale_active: false };
+    const row = rows[0];
+    if (row) {
+      return {
+        global_discount: Number(row.global_discount),
+        is_sale_active: Boolean(row.is_sale_active)
+      };
+    }
+    return { global_discount: 0, is_sale_active: false };
   } catch {
     return { global_discount: 0, is_sale_active: false };
   }
