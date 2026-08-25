@@ -10,22 +10,60 @@ export async function checkIsAdmin() {
   return userId && userId === process.env.ADMIN_USER_ID;
 }
 
-export async function getItems(searchQuery?: string): Promise<Item[]> {
+export async function getItems(searchQuery?: string, tag?: string, sort?: string): Promise<Item[]> {
   try {
+    let baseQuery = `SELECT * FROM items WHERE is_active = true`;
+    const params: any[] = [];
+    
     if (searchQuery) {
-      const qs = `%${searchQuery}%`;
-      const { rows } = await sql<Item>`
-        SELECT * FROM items 
-        WHERE is_active = true 
-        AND (title ILIKE ${qs} OR description ILIKE ${qs})
-        ORDER BY created_at DESC
-      `;
-      return rows;
+      params.push(`%${searchQuery}%`);
+      baseQuery += ` AND (title ILIKE $${params.length} OR description ILIKE $${params.length})`;
     }
-    const { rows } = await sql<Item>`SELECT * FROM items WHERE is_active = true ORDER BY created_at DESC`;
-    return rows;
+    
+    if (tag) {
+      // Tags is a JSONB array, we check if it contains the tag string
+      params.push(JSON.stringify([tag]));
+      baseQuery += ` AND tags @> $${params.length}::jsonb`;
+    }
+
+    if (sort === 'price_asc') {
+      baseQuery += ` ORDER BY price ASC`;
+    } else if (sort === 'price_desc') {
+      baseQuery += ` ORDER BY price DESC`;
+    } else {
+      baseQuery += ` ORDER BY created_at DESC`;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { rows } = await sql.query(baseQuery, params);
+    return rows as Item[];
   } catch (error) {
     console.error('Error fetching items:', error);
+    return [];
+  }
+}
+
+export async function getRelatedItems(itemId: number, tags: string[]): Promise<Item[]> {
+  if (!tags || tags.length === 0) return [];
+  
+  try {
+    const params: any[] = [itemId];
+    // Find items that have ANY of the tags, excluding the current item
+    const tagConditions = tags.map((t, i) => {
+      params.push(JSON.stringify([t]));
+      return `tags @> $${i + 2}::jsonb`;
+    }).join(' OR ');
+
+    const query = `
+      SELECT * FROM items 
+      WHERE id != $1 AND is_active = true AND (${tagConditions})
+      ORDER BY created_at DESC
+      LIMIT 4
+    `;
+    const { rows } = await sql.query(query, params);
+    return rows as Item[];
+  } catch (error) {
+    console.error('Error fetching related items:', error);
     return [];
   }
 }
@@ -285,5 +323,20 @@ export async function deleteDiscountRule(id: number) {
     revalidatePath('/admin');
   } catch (e) {
     console.error(e);
+  }
+}
+
+export async function getAvailableTags(): Promise<string[]> {
+  try {
+    const { rows } = await sql`
+      SELECT DISTINCT jsonb_array_elements_text(tags) as tag
+      FROM items
+      WHERE is_active = true AND tags IS NOT NULL AND jsonb_typeof(tags) = 'array'
+      ORDER BY tag
+    `;
+    return rows.map(r => r.tag);
+  } catch (error) {
+    console.error('Error fetching tags:', error);
+    return [];
   }
 }

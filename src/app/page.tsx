@@ -1,12 +1,14 @@
-import { getItems, getStoreSettings, getDiscountRules } from '@/lib/actions';
+import { getItems, getStoreSettings, getDiscountRules, getAvailableTags } from '@/lib/actions';
 import ProductCard from '@/components/ProductCard';
+import StoreFilterBar from '@/components/StoreFilterBar';
 
 export const dynamic = 'force-dynamic';
 
-export default async function Home({ searchParams }: { searchParams: { q?: string } }) {
-  const items = await getItems(searchParams.q);
+export default async function Home({ searchParams }: { searchParams: { q?: string, tag?: string, sort?: string } }) {
+  const items = await getItems(searchParams.q, searchParams.tag, searchParams.sort);
   const settings = await getStoreSettings();
   const rules = await getDiscountRules();
+  const availableTags = await getAvailableTags();
 
   return (
     <main className="min-h-screen bg-[#fcfcfc]">
@@ -35,15 +37,17 @@ export default async function Home({ searchParams }: { searchParams: { q?: strin
 
       {/* Catalog Grid */}
       <section className="max-w-7xl mx-auto px-6 py-24">
-        <div className="flex justify-between items-end mb-12 border-b border-[#e5e5e5] pb-6">
+        <div className="flex flex-col md:flex-row justify-between items-center mb-8 border-b border-[#e5e5e5] pb-6 gap-4">
           <h3 className="text-3xl font-bold text-[#222222] font-serif">The Collection</h3>
           <span className="text-[#666666] font-medium tracking-wide uppercase text-sm">{items.length} artifacts</span>
         </div>
 
+        <StoreFilterBar availableTags={availableTags} />
+
         {items.length === 0 ? (
           <div className="text-center py-32 bg-white rounded-2xl border border-[#e5e5e5]">
-            {searchParams.q ? (
-              <p className="text-[#666666] text-lg">No results found for &quot;{searchParams.q}&quot;. Try a different term!</p>
+            {(searchParams.q || searchParams.tag) ? (
+              <p className="text-[#666666] text-lg">No results found. Try clearing your filters!</p>
             ) : (
               <p className="text-[#666666] text-lg">Our collection is currently being curated.</p>
             )}

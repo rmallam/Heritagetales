@@ -2,6 +2,7 @@ import { getItem, getStoreSettings, getDiscountRules } from '@/lib/actions';
 import { notFound } from 'next/navigation';
 import Gallery from '@/components/Gallery';
 import AddToCartButton from '@/components/AddToCartButton';
+import RelatedProducts from '@/components/RelatedProducts';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
@@ -94,6 +95,8 @@ export default async function ProductPage({ params }: { params: { id: string } }
             />
           </div>
         </div>
+
+        <RelatedProducts item={item} />
       </div>
     </div>
   );
