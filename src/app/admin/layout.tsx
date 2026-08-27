@@ -1,7 +1,7 @@
 import { auth } from '@clerk/nextjs/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Package, PlusCircle, Settings, Store } from 'lucide-react';
+import { Package, PlusCircle, Settings, Store, Star } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -32,6 +32,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <Link href="/admin/items" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-neutral-700 hover:bg-neutral-100 transition-colors">
               <PlusCircle className="w-5 h-5" />
               Add Product
+            </Link>
+            <Link href="/admin/reviews" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-neutral-700 hover:bg-neutral-100 transition-colors">
+              <Star className="w-5 h-5" />
+              Manage Reviews
             </Link>
             <Link href="/admin/settings" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium text-neutral-700 hover:bg-neutral-100 transition-colors">
               <Settings className="w-5 h-5" />

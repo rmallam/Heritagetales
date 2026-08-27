@@ -340,3 +340,133 @@ export async function getAvailableTags(): Promise<string[]> {
     return [];
   }
 }
+
+import { Wishlist, Review } from './db';
+
+// Wishlist Actions
+export async function toggleWishlist(itemId: number) {
+  const { userId } = auth();
+  if (!userId) return { error: 'Not authenticated' };
+
+  try {
+    const { rowCount } = await sql`
+      DELETE FROM wishlists WHERE user_id = ${userId} AND item_id = ${itemId}
+    `;
+    
+    if (rowCount === 0) {
+      await sql`
+        INSERT INTO wishlists (user_id, item_id) VALUES (${userId}, ${itemId})
+      `;
+      return { added: true };
+    }
+    return { added: false };
+  } catch (error) {
+    console.error('Error toggling wishlist:', error);
+    return { error: 'Failed to toggle wishlist' };
+  }
+}
+
+export async function getUserWishlists(): Promise<number[]> {
+  const { userId } = auth();
+  if (!userId) return [];
+
+  try {
+    const { rows } = await sql`SELECT item_id FROM wishlists WHERE user_id = ${userId}`;
+    return rows.map(r => r.item_id);
+  } catch (error) {
+    console.error('Error fetching wishlists:', error);
+    return [];
+  }
+}
+
+export async function getWishlistedItems(): Promise<Item[]> {
+  const { userId } = auth();
+  if (!userId) return [];
+
+  try {
+    const { rows } = await sql<Item>`
+      SELECT i.* FROM items i
+      JOIN wishlists w ON i.id = w.item_id
+      WHERE w.user_id = ${userId} AND i.is_active = true
+      ORDER BY w.created_at DESC
+    `;
+    return rows;
+  } catch (error) {
+    console.error('Error fetching wishlisted items:', error);
+    return [];
+  }
+}
+
+// Review Actions
+export async function addReview(formData: FormData) {
+  const { userId } = auth();
+  if (!userId) return { error: 'Not authenticated' };
+
+  const itemId = parseInt(formData.get('item_id') as string);
+  const rating = parseInt(formData.get('rating') as string);
+  const comment = formData.get('comment') as string;
+  const userName = formData.get('user_name') as string || 'Anonymous';
+
+  if (!itemId || !rating) return { error: 'Missing required fields' };
+
+  try {
+    await sql`
+      INSERT INTO reviews (item_id, user_id, user_name, rating, comment)
+      VALUES (${itemId}, ${userId}, ${userName}, ${rating}, ${comment})
+    `;
+    revalidatePath(`/product/${itemId}`);
+    return { success: true };
+  } catch (error) {
+    console.error('Error adding review:', error);
+    return { error: 'Failed to add review' };
+  }
+}
+
+export async function getApprovedReviews(itemId: number): Promise<Review[]> {
+  try {
+    const { rows } = await sql<Review>`
+      SELECT * FROM reviews 
+      WHERE item_id = ${itemId} AND is_approved = true
+      ORDER BY created_at DESC
+    `;
+    return rows;
+  } catch (error) {
+    console.error('Error fetching approved reviews:', error);
+    return [];
+  }
+}
+
+export async function getAllReviewsAdmin(): Promise<(Review & { item_title: string })[]> {
+  try {
+    const { rows } = await sql`
+      SELECT r.*, i.title as item_title 
+      FROM reviews r
+      JOIN items i ON r.item_id = i.id
+      ORDER BY r.created_at DESC
+    `;
+    return rows as (Review & { item_title: string })[];
+  } catch (error) {
+    console.error('Error fetching all reviews:', error);
+    return [];
+  }
+}
+
+export async function toggleReviewApproval(id: number, currentStatus: boolean) {
+  try {
+    await sql`UPDATE reviews SET is_approved = ${!currentStatus} WHERE id = ${id}`;
+    revalidatePath('/admin/reviews');
+    // We ideally would revalidate the specific product page too, but we don't have the item_id easily here
+    // unless we query it first.
+  } catch (error) {
+    console.error('Error toggling review approval:', error);
+  }
+}
+
+export async function deleteReview(id: number) {
+  try {
+    await sql`DELETE FROM reviews WHERE id = ${id}`;
+    revalidatePath('/admin/reviews');
+  } catch (error) {
+    console.error('Error deleting review:', error);
+  }
+}

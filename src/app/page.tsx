@@ -1,4 +1,4 @@
-import { getItems, getStoreSettings, getDiscountRules, getAvailableTags } from '@/lib/actions';
+import { getItems, getStoreSettings, getDiscountRules, getAvailableTags, getUserWishlists } from '@/lib/actions';
 import ProductCard from '@/components/ProductCard';
 import StoreFilterBar from '@/components/StoreFilterBar';
 
@@ -9,6 +9,7 @@ export default async function Home({ searchParams }: { searchParams: { q?: strin
   const settings = await getStoreSettings();
   const rules = await getDiscountRules();
   const availableTags = await getAvailableTags();
+  const userWishlists = await getUserWishlists();
 
   return (
     <main className="min-h-screen bg-[#fcfcfc]">
@@ -61,6 +62,7 @@ export default async function Home({ searchParams }: { searchParams: { q?: strin
                 globalDiscount={settings.global_discount} 
                 isSaleActive={settings.is_sale_active} 
                 discountRules={rules}
+                isWishlisted={userWishlists.includes(item.id)}
               />
             ))}
           </div>

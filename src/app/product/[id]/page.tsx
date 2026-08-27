@@ -1,8 +1,9 @@
-import { getItem, getStoreSettings, getDiscountRules } from '@/lib/actions';
+import { getItem, getStoreSettings, getDiscountRules, getApprovedReviews } from '@/lib/actions';
 import { notFound } from 'next/navigation';
 import Gallery from '@/components/Gallery';
 import AddToCartButton from '@/components/AddToCartButton';
 import RelatedProducts from '@/components/RelatedProducts';
+import ReviewSection from '@/components/ReviewSection';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
@@ -16,6 +17,8 @@ export default async function ProductPage({ params }: { params: { id: string } }
   if (!item) {
     notFound();
   }
+  
+  const reviews = await getApprovedReviews(item.id);
 
   // Safely parse additional images
   let allImages = item.image_url ? [item.image_url] : [];
@@ -96,6 +99,7 @@ export default async function ProductPage({ params }: { params: { id: string } }
           </div>
         </div>
 
+        <ReviewSection itemId={item.id} reviews={reviews} />
         <RelatedProducts item={item} />
       </div>
     </div>

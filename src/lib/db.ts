@@ -24,3 +24,21 @@ export interface DiscountRule {
   discount_percentage: number;
   is_active: boolean;
 }
+
+export interface Wishlist {
+  id: number;
+  user_id: string;
+  item_id: number;
+  created_at: string;
+}
+
+export interface Review {
+  id: number;
+  item_id: number;
+  user_id: string;
+  user_name: string;
+  rating: number;
+  comment: string;
+  is_approved: boolean;
+  created_at: string;
+}

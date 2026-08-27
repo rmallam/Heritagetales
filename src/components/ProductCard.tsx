@@ -5,8 +5,9 @@ import { useCartStore } from '@/lib/store';
 import { Package } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
+import WishlistButton from './WishlistButton';
 
-export default function ProductCard({ item, globalDiscount = 0, isSaleActive = false, discountRules = [] }: { item: Item, globalDiscount?: number, isSaleActive?: boolean, discountRules?: DiscountRule[] }) {
+export default function ProductCard({ item, globalDiscount = 0, isSaleActive = false, discountRules = [], isWishlisted = false }: { item: Item, globalDiscount?: number, isSaleActive?: boolean, discountRules?: DiscountRule[], isWishlisted?: boolean }) {
   const addItem = useCartStore((state) => state.addItem);
   const [selectedVariant, setSelectedVariant] = useState<Variant | null>(item.variants && item.variants.length > 0 ? item.variants[0] : null);
 
@@ -35,31 +36,34 @@ export default function ProductCard({ item, globalDiscount = 0, isSaleActive = f
 
   return (
     <div className="group relative bg-white border border-neutral-100 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full">
-      <Link href={`/product/${item.id}`} className="block relative aspect-square bg-neutral-100 overflow-hidden">
-        {item.image_url ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center">
-            <Package className="w-12 h-12 text-neutral-300" />
-          </div>
-        )}
-        {!inStock && (
-          <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 text-xs font-bold uppercase tracking-wider text-neutral-500 rounded-full">
-            Out of Stock
-          </div>
-        )}
-        {inStock && stockCount <= 5 && (
-          <div className="absolute top-4 right-4 bg-orange-100/90 backdrop-blur-sm px-3 py-1 text-xs font-bold uppercase tracking-wider text-orange-700 rounded-full">
-            Only {stockCount} left!
-          </div>
-        )}
-        {isDiscounted && inStock && (
-          <div className="absolute top-4 left-4 bg-[#b5955b] text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full shadow-md">
-            {saleReason} -{bestDiscount}%
-          </div>
-        )}
-      </Link>
+      <div className="relative aspect-square bg-neutral-100 overflow-hidden">
+        <WishlistButton itemId={item.id} initialWishlisted={isWishlisted} />
+        <Link href={`/product/${item.id}`} className="block relative w-full h-full">
+          {item.image_url ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+          ) : (
+            <div className="w-full h-full flex items-center justify-center">
+              <Package className="w-12 h-12 text-neutral-300" />
+            </div>
+          )}
+          {!inStock && (
+            <div className="absolute top-4 left-4 bg-white/90 backdrop-blur-sm px-3 py-1 text-xs font-bold uppercase tracking-wider text-neutral-500 rounded-full">
+              Out of Stock
+            </div>
+          )}
+          {inStock && stockCount <= 5 && (
+            <div className="absolute top-4 left-4 bg-orange-100/90 backdrop-blur-sm px-3 py-1 text-xs font-bold uppercase tracking-wider text-orange-700 rounded-full">
+              Only {stockCount} left!
+            </div>
+          )}
+          {isDiscounted && inStock && (
+            <div className="absolute bottom-4 left-4 bg-[#b5955b] text-white px-3 py-1 text-xs font-bold uppercase tracking-wider rounded-full shadow-md">
+              {saleReason} -{bestDiscount}%
+            </div>
+          )}
+        </Link>
+      </div>
       <div className="p-6 flex flex-col flex-1">
         <div className="mb-4 flex-1">
           <Link href={`/product/${item.id}`}>

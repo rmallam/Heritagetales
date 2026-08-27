@@ -32,6 +32,31 @@ export async function GET() {
       );
     `;
 
+    // Create the wishlists table
+    await sql`
+      CREATE TABLE IF NOT EXISTS wishlists (
+        id SERIAL PRIMARY KEY,
+        user_id VARCHAR(255) NOT NULL,
+        item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, item_id)
+      );
+    `;
+
+    // Create the reviews table
+    await sql`
+      CREATE TABLE IF NOT EXISTS reviews (
+        id SERIAL PRIMARY KEY,
+        item_id INTEGER NOT NULL REFERENCES items(id) ON DELETE CASCADE,
+        user_id VARCHAR(255) NOT NULL,
+        user_name VARCHAR(255) DEFAULT 'Anonymous',
+        rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+        comment TEXT,
+        is_approved BOOLEAN DEFAULT false,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+
     // Create the orders table
     await sql`
       CREATE TABLE IF NOT EXISTS orders (

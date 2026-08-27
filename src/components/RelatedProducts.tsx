@@ -1,5 +1,5 @@
 import { Item } from '@/lib/db';
-import { getRelatedItems, getStoreSettings, getDiscountRules } from '@/lib/actions';
+import { getRelatedItems, getStoreSettings, getDiscountRules, getUserWishlists } from '@/lib/actions';
 import ProductCard from './ProductCard';
 
 export default async function RelatedProducts({ item }: { item: Item }) {
@@ -15,6 +15,7 @@ export default async function RelatedProducts({ item }: { item: Item }) {
 
   const settings = await getStoreSettings();
   const rules = await getDiscountRules();
+  const userWishlists = await getUserWishlists();
 
   return (
     <div className="mt-24 pt-16 border-t border-neutral-200">
@@ -27,6 +28,7 @@ export default async function RelatedProducts({ item }: { item: Item }) {
             globalDiscount={settings.global_discount}
             isSaleActive={settings.is_sale_active}
             discountRules={rules}
+            isWishlisted={userWishlists.includes(relatedItem.id)}
           />
         ))}
       </div>
