@@ -1,36 +1,75 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Heritage Tales - Storefront
 
-## Getting Started
+A modern, high-performance e-commerce storefront built with Next.js 14, Tailwind CSS, and a powerful serverless backend.
 
-First, run the development server:
+## Tech Stack & Integrations
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+This project is fully integrated with top-tier serverless services to handle authentication, payments, emails, and database management.
+
+### 1. Authentication: Clerk
+- **Account Used:** `mallamrakeshkumar@gmail.com`
+- **Purpose:** Handles secure user authentication, social logins, and guest checkout sessions.
+- **Admin Setup:** The admin dashboard is protected via Clerk. The `ADMIN_USER_ID` environment variable is checked to ensure only authorized owners can access `/admin`.
+
+### 2. Payments: Stripe
+- **Account Used:** `mallamrakesh@gmail.com`
+- **Purpose:** Securely processes credit card payments, calculates totals, and handles webhook events for order fulfillment.
+- **Implementation:** Uses Stripe Checkout Sessions for a seamless and highly-converting checkout experience.
+
+### 3. Transactional Emails: Resend
+- **Account Used:** `mallamrakeshkumar@gmail.com`
+- **Purpose:** Sends order confirmation emails to customers and abandoned cart recovery emails.
+- **Templates:** Styled with React Email components.
+
+### 4. Database: Vercel Postgres (Neon)
+- **Purpose:** The core relational database storing products, orders, wishlists, reviews, blog posts, and store settings.
+- **Management:** Managed directly inside the Vercel dashboard.
+
+### 5. Object Storage: Vercel Blob
+- **Purpose:** Stores product images and blog cover photos. 
+- **Important:** The Blob Store *must* be configured with **Public** access so that customers can view the images on the storefront.
+
+---
+
+## Environment Variables (.env.local)
+
+To run this project locally, create a `.env.local` file in the root directory and populate it with the following secrets:
+
+```env
+# Clerk Authentication
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
+CLERK_SECRET_KEY=sk_test_...
+ADMIN_USER_ID=user_2...
+
+# Stripe Payments
+NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_test_...
+STRIPE_SECRET_KEY=sk_test_...
+
+# Resend Emails
+RESEND_API_KEY=re_...
+
+# Vercel Postgres Database
+POSTGRES_URL="postgres://..."
+POSTGRES_URL_NON_POOLING="postgres://..."
+
+# Vercel Blob Storage
+BLOB_READ_WRITE_TOKEN="vercel_blob_rw_..."
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Setup & Deployment
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. **Install Dependencies:**
+   ```bash
+   npm install
+   ```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+2. **Run Development Server:**
+   ```bash
+   npm run dev
+   ```
 
-## Learn More
+3. **Database Migrations:**
+   After connecting a fresh Postgres database, you must navigate to `http://localhost:3000/api/setup` (or your production URL `https://your-domain.com/api/setup`) to automatically create all the necessary SQL tables (items, orders, wishlists, reviews, etc.).
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+4. **Production Deployment:**
+   The easiest way to deploy this Next.js app is to connect your GitHub repository directly to [Vercel](https://vercel.com/new). Vercel will automatically configure the Postgres and Blob storage addons for you.
