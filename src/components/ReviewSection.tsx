@@ -66,7 +66,14 @@ export default function ReviewSection({ itemId, reviews }: { itemId: number, rev
                     </div>
                   </div>
                   {review.comment && (
-                    <p className="text-neutral-600 leading-relaxed pl-13">{review.comment}</p>
+                    <p className="text-neutral-600 leading-relaxed pl-13 mb-4">{review.comment}</p>
+                  )}
+                  {review.admin_response && (
+                    <div className="ml-13 bg-neutral-50 p-4 rounded-xl border border-neutral-100 relative">
+                      <div className="absolute -left-2 top-4 w-4 h-4 bg-neutral-50 border-t border-l border-neutral-100 transform -rotate-45"></div>
+                      <p className="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-1">Response from Heritage Tales</p>
+                      <p className="text-sm text-neutral-700">{review.admin_response}</p>
+                    </div>
                   )}
                 </div>
               ))}

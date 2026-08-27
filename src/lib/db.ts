@@ -40,5 +40,16 @@ export interface Review {
   rating: number;
   comment: string;
   is_approved: boolean;
+  admin_response?: string;
+  created_at: string;
+}
+
+export interface BlogPost {
+  id: number;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  cover_image: string;
   created_at: string;
 }

@@ -411,14 +411,23 @@ export async function addReview(formData: FormData) {
 
   try {
     await sql`
-      INSERT INTO reviews (item_id, user_id, user_name, rating, comment)
-      VALUES (${itemId}, ${userId}, ${userName}, ${rating}, ${comment})
+      INSERT INTO reviews (item_id, user_id, user_name, rating, comment, is_approved)
+      VALUES (${itemId}, ${userId}, ${userName}, ${rating}, ${comment}, true)
     `;
     revalidatePath(`/product/${itemId}`);
     return { success: true };
   } catch (error) {
     console.error('Error adding review:', error);
     return { error: 'Failed to add review' };
+  }
+}
+
+export async function addReviewResponse(id: number, response: string) {
+  try {
+    await sql`UPDATE reviews SET admin_response = ${response} WHERE id = ${id}`;
+    revalidatePath('/admin/reviews');
+  } catch (error) {
+    console.error('Error adding review response:', error);
   }
 }
 
@@ -468,5 +477,72 @@ export async function deleteReview(id: number) {
     revalidatePath('/admin/reviews');
   } catch (error) {
     console.error('Error deleting review:', error);
+  }
+}
+
+import { BlogPost } from './db';
+
+// Blog Actions
+export async function getBlogPosts(): Promise<BlogPost[]> {
+  try {
+    const { rows } = await sql<BlogPost>`SELECT * FROM blog_posts ORDER BY created_at DESC`;
+    return rows;
+  } catch (error) {
+    console.error('Error fetching blog posts:', error);
+    return [];
+  }
+}
+
+export async function getBlogPostBySlug(slug: string): Promise<BlogPost | undefined> {
+  try {
+    const { rows } = await sql<BlogPost>`SELECT * FROM blog_posts WHERE slug = ${slug}`;
+    return rows[0];
+  } catch (error) {
+    console.error('Error fetching blog post:', error);
+    return undefined;
+  }
+}
+
+export async function addBlogPost(formData: FormData) {
+  const title = formData.get('title') as string;
+  const slug = formData.get('slug') as string;
+  const excerpt = formData.get('excerpt') as string;
+  const content = formData.get('content') as string;
+  const imageFile = formData.get('cover_image') as File;
+
+  if (!title || !slug || !content) {
+    throw new Error('Title, slug, and content are required.');
+  }
+
+  let cover_image = '';
+  
+  if (imageFile && imageFile.size > 0) {
+    if (process.env.BLOB_READ_WRITE_TOKEN) {
+      const { put } = await import('@vercel/blob');
+      const blob = await put(imageFile.name, imageFile, { access: 'public' });
+      cover_image = blob.url;
+    }
+  }
+
+  try {
+    await sql`
+      INSERT INTO blog_posts (title, slug, excerpt, content, cover_image)
+      VALUES (${title}, ${slug}, ${excerpt}, ${content}, ${cover_image})
+    `;
+    revalidatePath('/journal');
+    revalidatePath('/admin/blog');
+  } catch (error) {
+    console.error('Error adding blog post:', error);
+    throw new Error('Failed to add blog post.');
+  }
+}
+
+export async function deleteBlogPost(id: number) {
+  try {
+    await sql`DELETE FROM blog_posts WHERE id = ${id}`;
+    revalidatePath('/journal');
+    revalidatePath('/admin/blog');
+  } catch (error) {
+    console.error('Error deleting blog post:', error);
   }
 }

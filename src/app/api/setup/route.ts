@@ -52,7 +52,30 @@ export async function GET() {
         user_name VARCHAR(255) DEFAULT 'Anonymous',
         rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
         comment TEXT,
-        is_approved BOOLEAN DEFAULT false,
+        is_approved BOOLEAN DEFAULT true,
+        admin_response TEXT,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+      );
+    `;
+
+    // Apply alters for existing databases
+    await sql`ALTER TABLE reviews ALTER COLUMN is_approved SET DEFAULT true;`;
+    await sql`UPDATE reviews SET is_approved = true WHERE is_approved = false;`;
+    try {
+      await sql`ALTER TABLE reviews ADD COLUMN admin_response TEXT;`;
+    } catch {
+      // Column might already exist
+    }
+
+    // Create the blog posts table
+    await sql`
+      CREATE TABLE IF NOT EXISTS blog_posts (
+        id SERIAL PRIMARY KEY,
+        title VARCHAR(255) NOT NULL,
+        slug VARCHAR(255) UNIQUE NOT NULL,
+        excerpt TEXT,
+        content TEXT NOT NULL,
+        cover_image VARCHAR(255),
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
     `;
