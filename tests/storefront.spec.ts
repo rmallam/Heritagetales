@@ -19,7 +19,7 @@ test.describe('E-commerce Features', () => {
       await expect(page.locator('text=Add to Cart').first()).toBeVisible();
       
       // If the product has variants, there will be a select dropdown
-      const variantSelect = page.locator('select');
+      const variantSelect = page.locator('select').first();
       if (await variantSelect.count() > 0) {
         // Select the second option if available
         const options = await variantSelect.locator('option').all();
@@ -51,7 +51,7 @@ test.describe('E-commerce Features', () => {
       await expect(page.locator('text=Your Cart')).toBeVisible();
 
       // Click proceed to checkout
-      await page.locator('button:has-text("Proceed to Checkout")').first().click();
+      await page.locator('button:has-text("Checkout Securely")').first().click();
 
       // Should show auth prompt (Sign In / Guest)
       await expect(page.locator('text=Continue as Guest')).toBeVisible();
