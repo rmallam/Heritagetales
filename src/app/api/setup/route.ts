@@ -21,6 +21,7 @@ export async function GET() {
     try { await sql`ALTER TABLE items ADD COLUMN variants JSONB DEFAULT '[]'::jsonb`; } catch {}
     try { await sql`ALTER TABLE items ADD COLUMN stock_count INTEGER DEFAULT 10`; } catch {}
     try { await sql`ALTER TABLE items ADD COLUMN tags JSONB DEFAULT '[]'::jsonb`; } catch {}
+    try { await sql`ALTER TABLE items ADD COLUMN slug TEXT UNIQUE`; } catch {}
 
     // Create the discount rules table
     await sql`
@@ -78,6 +79,13 @@ export async function GET() {
         cover_image VARCHAR(255),
         created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
+    `;
+
+    // Backfill slugs for existing items
+    await sql`
+      UPDATE items 
+      SET slug = lower(regexp_replace(title, '[^a-zA-Z0-9]+', '-', 'g')) || '-' || id::text 
+      WHERE slug IS NULL;
     `;
 
     // Create the orders table

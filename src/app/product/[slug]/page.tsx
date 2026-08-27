@@ -1,4 +1,4 @@
-import { getItemBySlug, getStoreSettings, getDiscountRules, getApprovedReviews } from '@/lib/actions';
+import { getItemBySlug, getItem, getStoreSettings, getDiscountRules, getApprovedReviews } from '@/lib/actions';
 import { notFound } from 'next/navigation';
 import Gallery from '@/components/Gallery';
 import AddToCartButton from '@/components/AddToCartButton';
@@ -10,7 +10,13 @@ import { ArrowLeft } from 'lucide-react';
 export const dynamic = 'force-dynamic';
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
-  const item = await getItemBySlug(params.slug);
+  let item = await getItemBySlug(params.slug);
+  
+  // Fallback for old integer IDs or if setup hasn't been run
+  if (!item && !isNaN(Number(params.slug))) {
+    item = await getItem(Number(params.slug));
+  }
+
   const settings = await getStoreSettings();
   const rules = await getDiscountRules();
 
