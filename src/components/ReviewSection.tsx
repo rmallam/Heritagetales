@@ -31,7 +31,7 @@ export default function ReviewSection({ itemId, reviews }: { itemId: number, rev
           (e.target as HTMLFormElement).reset();
           setRating(5);
         }
-      } catch (err) {
+      } catch {
         setError('An unexpected error occurred.');
       }
     });

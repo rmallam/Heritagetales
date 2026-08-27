@@ -13,7 +13,7 @@ export async function checkIsAdmin() {
 export async function getItems(searchQuery?: string, tag?: string, sort?: string): Promise<Item[]> {
   try {
     let baseQuery = `SELECT * FROM items WHERE is_active = true`;
-    const params: any[] = [];
+    const params: (string | number)[] = [];
     
     if (searchQuery) {
       params.push(`%${searchQuery}%`);
@@ -47,7 +47,7 @@ export async function getRelatedItems(itemId: number, tags: string[]): Promise<I
   if (!tags || tags.length === 0) return [];
   
   try {
-    const params: any[] = [itemId];
+    const params: (string | number)[] = [itemId];
     // Find items that have ANY of the tags, excluding the current item
     const tagConditions = tags.map((t, i) => {
       params.push(JSON.stringify([t]));
@@ -341,7 +341,7 @@ export async function getAvailableTags(): Promise<string[]> {
   }
 }
 
-import { Wishlist, Review } from './db';
+import { Review } from './db';
 
 // Wishlist Actions
 export async function toggleWishlist(itemId: number) {

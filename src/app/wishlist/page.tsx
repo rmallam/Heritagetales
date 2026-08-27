@@ -21,7 +21,7 @@ export default async function WishlistPage() {
       <div className="max-w-7xl mx-auto">
         <div className="mb-12 border-b border-[#e5e5e5] pb-6">
           <h1 className="text-4xl font-bold text-[#222222] font-serif">Your Wishlist</h1>
-          <p className="text-neutral-500 mt-2">Items you've saved for later.</p>
+          <p className="text-neutral-500 mt-2">Items you&apos;ve saved for later.</p>
         </div>
 
         {items.length === 0 ? (

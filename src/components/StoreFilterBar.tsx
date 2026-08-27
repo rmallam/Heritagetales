@@ -10,7 +10,6 @@ export default function StoreFilterBar({ availableTags }: { availableTags: strin
   
   const currentTag = searchParams.get('tag') || '';
   const currentSort = searchParams.get('sort') || '';
-  const currentQuery = searchParams.get('q') || '';
 
   const createQueryString = useCallback(
     (name: string, value: string) => {
