@@ -546,3 +546,44 @@ export async function deleteBlogPost(id: number) {
     console.error('Error deleting blog post:', error);
   }
 }
+
+// Dashboard Actions
+export async function getDashboardStats() {
+  try {
+    // Basic stats
+    const { rows: statRows } = await sql`
+      SELECT 
+        COUNT(id) as total_orders,
+        COALESCE(SUM(total_amount), 0) as total_revenue
+      FROM orders
+      WHERE status != 'cancelled'
+    `;
+
+    const totalOrders = parseInt(statRows[0].total_orders) || 0;
+    const totalRevenue = parseFloat(statRows[0].total_revenue) || 0;
+    const averageOrderValue = totalOrders > 0 ? totalRevenue / totalOrders : 0;
+
+    // Recent orders
+    const { rows: recentOrders } = await sql`
+      SELECT id, customer_email, total_amount, status, created_at
+      FROM orders
+      ORDER BY created_at DESC
+      LIMIT 5
+    `;
+
+    return {
+      totalOrders,
+      totalRevenue,
+      averageOrderValue,
+      recentOrders
+    };
+  } catch (error) {
+    console.error('Error fetching dashboard stats:', error);
+    return {
+      totalOrders: 0,
+      totalRevenue: 0,
+      averageOrderValue: 0,
+      recentOrders: []
+    };
+  }
+}
