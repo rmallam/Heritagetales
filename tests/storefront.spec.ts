@@ -32,7 +32,7 @@ test.describe('E-commerce Features', () => {
       }
 
       // Add to cart
-      await page.locator('button:has-text("Add to Cart")').click();
+      await page.locator('button:has-text("Add to Cart")').first().click();
 
       // Expect cart drawer to open
       await expect(page.locator('text=Your Cart')).toBeVisible();
@@ -45,13 +45,13 @@ test.describe('E-commerce Features', () => {
     const firstProduct = page.locator('a[href^="/product/"]').first();
     if (await firstProduct.count() > 0) {
       await firstProduct.click();
-      await page.locator('button:has-text("Add to Cart")').click();
+      await page.locator('button:has-text("Add to Cart")').first().click();
       
       // Cart drawer should be open
       await expect(page.locator('text=Your Cart')).toBeVisible();
 
       // Click proceed to checkout
-      await page.locator('button:has-text("Proceed to Checkout")').click();
+      await page.locator('button:has-text("Proceed to Checkout")').first().click();
 
       // Should show auth prompt (Sign In / Guest)
       await expect(page.locator('text=Continue as Guest')).toBeVisible();
