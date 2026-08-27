@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import Image from 'next/image';
 
 export default function Gallery({ images }: { images: string[] }) {
   const [mainImage, setMainImage] = useState(images[0]);
@@ -13,9 +14,14 @@ export default function Gallery({ images }: { images: string[] }) {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="aspect-square bg-[#f8f8f8] rounded-2xl overflow-hidden border border-[#e5e5e5]">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={mainImage} alt="Product image" className="w-full h-full object-cover transition-opacity duration-300" />
+      <div className="relative aspect-square bg-neutral-100 rounded-2xl overflow-hidden mb-4 border border-neutral-200">
+        <Image 
+          src={mainImage} 
+          alt="Product image" 
+          fill
+          sizes="(max-width: 768px) 100vw, 50vw"
+          className="object-cover transition-opacity duration-300" 
+        />
       </div>
       
       {images.length > 1 && (
@@ -24,10 +30,15 @@ export default function Gallery({ images }: { images: string[] }) {
             <button 
               key={idx} 
               onClick={() => setMainImage(img)}
-              className={`w-24 h-24 rounded-lg overflow-hidden border-2 flex-shrink-0 transition-all ${mainImage === img ? 'border-[#b5955b] opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
+              className={`relative w-24 h-24 rounded-xl overflow-hidden border-2 flex-shrink-0 transition-all ${mainImage === img ? 'border-[#b5955b] opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={img} className="w-full h-full object-cover" alt={`Thumbnail ${idx + 1}`} />
+              <Image 
+                src={img} 
+                fill
+                sizes="100px"
+                className="object-cover" 
+                alt={`Thumbnail ${idx + 1}`} 
+              />
             </button>
           ))}
         </div>

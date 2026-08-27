@@ -4,6 +4,7 @@ import { Item, Variant, DiscountRule } from '@/lib/db';
 import { useCartStore } from '@/lib/store';
 import { Package } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { useState } from 'react';
 import WishlistButton from './WishlistButton';
 
@@ -33,15 +34,21 @@ export default function ProductCard({ item, globalDiscount = 0, isSaleActive = f
   const isDiscounted = bestDiscount > 0;
   const discountMultiplier = isDiscounted ? (100 - bestDiscount) / 100 : 1;
   const displayPrice = price * discountMultiplier;
+  const productUrl = `/product/${item.slug || item.id}`;
 
   return (
     <div className="group relative bg-white border border-neutral-100 rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden flex flex-col h-full">
       <div className="relative aspect-square bg-neutral-100 overflow-hidden">
         <WishlistButton itemId={item.id} initialWishlisted={isWishlisted} />
-        <Link href={`/product/${item.id}`} className="block relative w-full h-full">
+        <Link href={productUrl} className="block relative w-full h-full">
           {item.image_url ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={item.image_url} alt={item.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+            <Image 
+              src={item.image_url} 
+              alt={item.title} 
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+              className="object-cover group-hover:scale-105 transition-transform duration-500" 
+            />
           ) : (
             <div className="w-full h-full flex items-center justify-center">
               <Package className="w-12 h-12 text-neutral-300" />
@@ -66,7 +73,7 @@ export default function ProductCard({ item, globalDiscount = 0, isSaleActive = f
       </div>
       <div className="p-6 flex flex-col flex-1">
         <div className="mb-4 flex-1">
-          <Link href={`/product/${item.id}`}>
+          <Link href={productUrl}>
             <h3 className="font-bold text-lg text-neutral-900 group-hover:text-[#b5955b] transition-colors line-clamp-1">{item.title}</h3>
           </Link>
           <p className="text-sm text-neutral-500 mt-2 line-clamp-2">{item.description}</p>

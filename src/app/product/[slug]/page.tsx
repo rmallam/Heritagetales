@@ -1,4 +1,4 @@
-import { getItem, getStoreSettings, getDiscountRules, getApprovedReviews } from '@/lib/actions';
+import { getItemBySlug, getStoreSettings, getDiscountRules, getApprovedReviews } from '@/lib/actions';
 import { notFound } from 'next/navigation';
 import Gallery from '@/components/Gallery';
 import AddToCartButton from '@/components/AddToCartButton';
@@ -9,8 +9,8 @@ import { ArrowLeft } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
-export default async function ProductPage({ params }: { params: { id: string } }) {
-  const item = await getItem(params.id);
+export default async function ProductPage({ params }: { params: { slug: string } }) {
+  const item = await getItemBySlug(params.slug);
   const settings = await getStoreSettings();
   const rules = await getDiscountRules();
 

@@ -1,6 +1,7 @@
 import { getBlogPostBySlug } from '@/lib/actions';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowLeft } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -33,9 +34,14 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
         </header>
 
         {post.cover_image && (
-          <div className="w-full h-80 md:h-96 bg-neutral-100 rounded-2xl overflow-hidden mb-16 shadow-md">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={post.cover_image} alt={post.title} className="w-full h-full object-cover" />
+          <div className="relative w-full h-80 md:h-96 bg-neutral-100 rounded-2xl overflow-hidden mb-16 shadow-md">
+            <Image 
+              src={post.cover_image} 
+              alt={post.title} 
+              fill
+              sizes="(max-width: 1200px) 100vw, 800px"
+              className="object-cover" 
+            />
           </div>
         )}
 

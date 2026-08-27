@@ -1,5 +1,6 @@
 import { getBlogPosts } from '@/lib/actions';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export const dynamic = 'force-dynamic';
 
@@ -24,8 +25,13 @@ export default async function JournalPage() {
               <Link key={post.id} href={`/journal/${post.slug}`} className="group block bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 overflow-hidden border border-neutral-100 flex flex-col">
                 {post.cover_image && (
                   <div className="relative h-64 overflow-hidden bg-neutral-100">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={post.cover_image} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                    <Image 
+                      src={post.cover_image} 
+                      alt={post.title} 
+                      fill
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                      className="object-cover group-hover:scale-105 transition-transform duration-500" 
+                    />
                   </div>
                 )}
                 <div className="p-8 flex-1 flex flex-col">

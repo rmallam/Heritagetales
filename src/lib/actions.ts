@@ -98,7 +98,17 @@ export async function toggleItemActive(id: number, currentActive: boolean) {
   }
 }
 
-export async function getItem(id: string): Promise<Item | undefined> {
+export async function getItemBySlug(slug: string): Promise<Item | undefined> {
+  try {
+    const { rows } = await sql<Item>`SELECT * FROM items WHERE slug = ${slug}`;
+    return rows[0];
+  } catch (error) {
+    console.error('Error fetching item by slug:', error);
+    return undefined;
+  }
+}
+
+export async function getItem(id: number): Promise<Item | undefined> {
   try {
     const { rows } = await sql<Item>`SELECT * FROM items WHERE id = ${id}`;
     return rows[0];
@@ -141,11 +151,13 @@ export async function addItem(formData: FormData) {
   
   const tagsStr = formData.get('tags') as string || '';
   const tags = JSON.stringify(tagsStr.split(',').map(t => t.trim()).filter(Boolean));
+  
+  const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
 
   try {
     await sql`
-      INSERT INTO items (title, description, price, image_url, additional_images, variants, stock_count, tags)
-      VALUES (${title}, ${description}, ${price}, ${image_url}, ${additional_images}, ${variants}, ${stockCount}, ${tags})
+      INSERT INTO items (title, slug, description, price, image_url, additional_images, variants, stock_count, tags)
+      VALUES (${title}, ${slug}, ${description}, ${price}, ${image_url}, ${additional_images}, ${variants}, ${stockCount}, ${tags})
     `;
     revalidatePath('/');
     revalidatePath('/admin/items');
