@@ -1,6 +1,7 @@
 import { getAllAdminItems } from '@/lib/actions';
 import AdminItemsList from '@/components/AdminItemsList';
 import AdminItemForm from '@/components/AdminItemForm';
+import BulkUploadButton from '@/components/BulkUploadButton';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,9 +19,12 @@ export default async function AdminItemsPage() {
         <AdminItemForm />
       </div>
 
-      <div className="mt-16 mb-8 border-b border-neutral-100 pb-6">
-        <h2 className="text-2xl font-bold text-neutral-900 tracking-tight">Manage Inventory</h2>
-        <p className="text-neutral-500 mt-2">Update stock status or archive products from your catalog.</p>
+      <div className="mt-16 mb-8 border-b border-neutral-100 pb-6 flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-neutral-900 tracking-tight">Manage Inventory</h2>
+          <p className="text-neutral-500 mt-2">Update stock, upload new photos, or archive products.</p>
+        </div>
+        <BulkUploadButton />
       </div>
 
       <AdminItemsList items={items} />

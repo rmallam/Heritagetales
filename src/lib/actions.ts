@@ -170,10 +170,31 @@ export async function addItem(formData: FormData) {
 export async function updateItemStock(id: number, newStock: number) {
   try {
     await sql`UPDATE items SET stock_count = ${newStock} WHERE id = ${id}`;
-    revalidatePath('/');
     revalidatePath('/admin/items');
-  } catch (e) {
-    console.error(e);
+    revalidatePath('/');
+  } catch (err) {
+    console.error('Failed to update stock:', err);
+  }
+}
+
+export async function updateItemImage(id: number, formData: FormData) {
+  const imageFile = formData.get('image_file') as File;
+  if (!imageFile || imageFile.size === 0) return;
+
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    throw new Error('Vercel Blob token is missing!');
+  }
+
+  const blob = await put(imageFile.name, imageFile, { access: 'public' });
+  
+  try {
+    await sql`UPDATE items SET image_url = ${blob.url} WHERE id = ${id}`;
+    revalidatePath('/admin/items');
+    revalidatePath('/');
+    revalidatePath('/product/[slug]', 'page');
+  } catch (err) {
+    console.error('Failed to update image:', err);
+    throw err;
   }
 }
 
@@ -653,4 +674,34 @@ export async function sendSupportEmail(formData: FormData) {
     console.error('Error sending support email:', error);
     return { error: 'An unexpected error occurred' };
   }
+}
+
+export async function bulkCreateItems(formData: FormData) {
+  const files = formData.getAll('images') as File[];
+  if (!files || files.length === 0) return;
+
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    throw new Error('Vercel Blob token is missing!');
+  }
+
+  for (const file of files) {
+    if (file.size === 0) continue;
+    try {
+      const blob = await put(file.name, file, { access: 'public' });
+      
+      // Use filename without extension as title
+      const title = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, ' ');
+      const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '') + '-' + Date.now().toString().slice(-4);
+      
+      await sql`
+        INSERT INTO items (title, slug, description, price, image_url, additional_images, variants, stock_count, tags)
+        VALUES (${title}, ${slug}, 'Description coming soon...', 0, ${blob.url}, '[]', '[]', 10, '[]')
+      `;
+    } catch (err) {
+      console.error(`Failed to create item from file ${file.name}:`, err);
+    }
+  }
+
+  revalidatePath('/admin/items');
+  revalidatePath('/');
 }

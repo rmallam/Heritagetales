@@ -18,13 +18,36 @@ export default function AdminItemsList({ items }: { items: Item[] }) {
         items.map(item => (
           <div key={item.id} className={`flex items-center justify-between p-4 bg-white rounded-xl border border-neutral-200 transition-opacity ${!item.is_active ? 'opacity-60' : ''}`}>
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 bg-neutral-100 rounded-lg overflow-hidden shrink-0">
+              <div className="w-16 h-16 bg-neutral-100 rounded-lg overflow-hidden shrink-0 relative group">
                 {item.image_url ? (
                   /* eslint-disable-next-line @next/next/no-img-element */
                   <img src={item.image_url} alt={item.title} className="w-full h-full object-cover grayscale-0" style={{ filter: !item.is_active ? 'grayscale(100%)' : 'none' }} />
                 ) : (
                   <Package className="w-full h-full p-4 text-neutral-300" />
                 )}
+                
+                {/* Image Update Overlay */}
+                <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <label htmlFor={`img-${item.id}`} className="cursor-pointer text-white text-[10px] font-bold uppercase tracking-wider text-center px-1">
+                    Edit
+                  </label>
+                  <input 
+                    type="file" 
+                    id={`img-${item.id}`} 
+                    accept="image/*" 
+                    className="hidden" 
+                    onChange={async (e) => {
+                      if (e.target.files && e.target.files[0]) {
+                        const formData = new FormData();
+                        formData.append('image_file', e.target.files[0]);
+                        startTransition(async () => {
+                          const { updateItemImage } = await import('@/lib/actions');
+                          await updateItemImage(item.id, formData);
+                        });
+                      }
+                    }}
+                  />
+                </div>
               </div>
               <div>
                 <h3 className="font-bold text-neutral-900">{item.title}</h3>
