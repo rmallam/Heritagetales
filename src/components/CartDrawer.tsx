@@ -11,6 +11,8 @@ export default function CartDrawer({ storeSettings }: { storeSettings?: { is_sal
   const { items, isOpen, toggleCart, removeItem, updateQuantity } = useCartStore();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const [postcode, setPostcode] = useState('');
+  const [shippingCost, setShippingCost] = useState<number | null>(null);
   const { userId } = useAuth();
   const { user } = useUser();
   
@@ -24,6 +26,25 @@ export default function CartDrawer({ storeSettings }: { storeSettings?: { is_sal
     }
   }, [items, userId, email]);
 
+  useEffect(() => {
+    if (postcode.length >= 4) {
+      const code = parseInt(postcode, 10);
+      if (!isNaN(code)) {
+        if (code >= 3000 && code <= 3207) {
+          setShippingCost(10); // Melbourne Metro
+        } else if (code >= 3208 && code <= 3999) {
+          setShippingCost(15); // VIC Regional
+        } else {
+          setShippingCost(25); // Rest of Australia
+        }
+      } else {
+        setShippingCost(null);
+      }
+    } else {
+      setShippingCost(null);
+    }
+  }, [postcode]);
+
   // Reset auth prompt if drawer closes or user logs in
   useEffect(() => {
     if (!isOpen || userId) {
@@ -35,6 +56,7 @@ export default function CartDrawer({ storeSettings }: { storeSettings?: { is_sal
   const isSaleActive = storeSettings?.is_sale_active && storeSettings.global_discount > 0;
   const discountMultiplier = isSaleActive ? (100 - storeSettings.global_discount) / 100 : 1;
   const discountedSubtotal = subtotal * discountMultiplier;
+  const finalTotal = discountedSubtotal + (shippingCost || 0);
 
   const handleCheckoutClick = () => {
     if (!userId && !showAuthPrompt) {
@@ -45,12 +67,16 @@ export default function CartDrawer({ storeSettings }: { storeSettings?: { is_sal
   };
 
   const handleCheckout = async () => {
+    if (!shippingCost && postcode.length < 4) {
+      alert("Please enter a valid postcode to calculate shipping.");
+      return;
+    }
     setIsCheckingOut(true);
     try {
       const response = await fetch('/api/checkout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items, userId, email }),
+        body: JSON.stringify({ items, userId, email, shippingCost, postcode }),
       });
       const data = await response.json();
       if (data.url) {
@@ -164,17 +190,49 @@ export default function CartDrawer({ storeSettings }: { storeSettings?: { is_sal
             </div>
 
             {items.length > 0 && (
-              <div className="p-6 border-t border-neutral-100 bg-neutral-50">
+              <div className="p-6 border-t border-neutral-100 bg-neutral-50 space-y-4">
+                
+                {/* Shipping Calculator */}
+                <div className="bg-white p-4 rounded-lg border border-neutral-200">
+                  <label htmlFor="postcode" className="block text-sm font-semibold text-neutral-700 mb-2">Estimate Shipping</label>
+                  <div className="flex gap-2">
+                    <input 
+                      type="text" 
+                      id="postcode"
+                      placeholder="Enter Postcode (e.g. 3000)"
+                      className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-1 focus:ring-[#b5955b] outline-none text-sm"
+                      value={postcode}
+                      onChange={(e) => setPostcode(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
+                    />
+                  </div>
+                  {shippingCost !== null && (
+                    <p className="text-sm text-green-700 mt-2 font-medium">
+                      Shipping to {postcode}: ${shippingCost.toFixed(2)}
+                    </p>
+                  )}
+                </div>
+
                 {isSaleActive && (
-                  <div className="flex justify-between items-center mb-2 text-sm text-neutral-500">
+                  <div className="flex justify-between items-center text-sm text-neutral-500">
                     <span>Original Subtotal</span>
                     <span className="line-through">${subtotal.toFixed(2)}</span>
                   </div>
                 )}
-                <div className="flex justify-between items-center mb-6">
-                  <span className="font-semibold text-neutral-600">Subtotal</span>
+                
+                <div className="flex justify-between items-center text-neutral-600">
+                  <span className="font-semibold">Subtotal</span>
+                  <span className="font-medium">${discountedSubtotal.toFixed(2)}</span>
+                </div>
+
+                <div className="flex justify-between items-center text-neutral-600 border-b border-neutral-200 pb-4">
+                  <span className="font-semibold">Shipping</span>
+                  <span className="font-medium">{shippingCost !== null ? `$${shippingCost.toFixed(2)}` : '---'}</span>
+                </div>
+
+                <div className="flex justify-between items-center pt-2">
+                  <span className="font-bold text-neutral-800 text-lg">Total</span>
                   <div className="text-right">
-                    <span className="text-xl font-bold text-neutral-900">${discountedSubtotal.toFixed(2)}</span>
+                    <span className="text-2xl font-bold text-neutral-900">${finalTotal.toFixed(2)}</span>
                     {isSaleActive && (
                       <span className="block text-xs font-bold text-green-600 mt-1 uppercase tracking-wider">
                         {storeSettings.global_discount}% Off Applied!
@@ -182,14 +240,14 @@ export default function CartDrawer({ storeSettings }: { storeSettings?: { is_sal
                     )}
                   </div>
                 </div>
+                
                 <button 
                   onClick={handleCheckoutClick}
-                  disabled={isCheckingOut}
-                  className="w-full py-4 bg-[#b5955b] hover:bg-[#a3844f] disabled:bg-[#d4c3a3] text-white rounded-full font-bold text-lg shadow-md transition-all active:scale-[0.98] flex justify-center items-center"
+                  disabled={isCheckingOut || shippingCost === null}
+                  className="w-full py-4 bg-[#222222] hover:bg-[#111111] disabled:bg-[#a3a3a3] text-white rounded-full font-bold text-lg shadow-md transition-all active:scale-[0.98] flex justify-center items-center mt-4"
                 >
                   {isCheckingOut ? 'Processing...' : 'Checkout Securely'}
                 </button>
-                <p className="text-center text-xs text-neutral-400 mt-4">Shipping & taxes calculated at checkout</p>
               </div>
             )}
           </>

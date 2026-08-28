@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ url: `${origin}/success` });
     }
 
-    const { items, userId, email }: { items: CartItem[], userId?: string | null, email?: string | null } = await request.json();
+    const { items, userId, email, shippingCost, postcode }: { items: CartItem[], userId?: string | null, email?: string | null, shippingCost?: number | null, postcode?: string | null } = await request.json();
 
     const origin = request.headers.get('origin') || 'http://localhost:3000';
 
@@ -38,6 +38,20 @@ export async function POST(request: Request) {
         quantity: item.quantity,
       };
     });
+
+    if (shippingCost && postcode) {
+      line_items.push({
+        price_data: {
+          currency: 'aud',
+          product_data: {
+            name: `Shipping (Postcode: ${postcode})`,
+            images: [],
+          },
+          unit_amount: Math.round(shippingCost * 100),
+        },
+        quantity: 1,
+      });
+    }
 
     const { getStoreSettings } = await import('@/lib/actions');
     const settings = await getStoreSettings();
