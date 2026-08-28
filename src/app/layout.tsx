@@ -26,8 +26,8 @@ export default async function RootLayout({
 
   return (
     <ClerkProvider>
-      <html lang="en">
-        <body className={`${inter.className} ${playfair.variable} bg-[#fcfcfc] text-[#222222]`}>
+      <html lang="en" className="overflow-x-hidden">
+        <body className={`${inter.className} ${playfair.variable} bg-[#fcfcfc] text-[#222222] overflow-x-hidden`}>
           {settings.is_sale_active && settings.global_discount > 0 && (
             <div className="bg-black text-white text-center py-2 text-sm font-bold tracking-wide uppercase">
               Global Sale: {settings.global_discount}% off entire store! Discount applied at checkout.

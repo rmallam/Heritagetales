@@ -7,11 +7,13 @@ import { useEffect } from 'react';
 
 export default function SuccessPage() {
   const clearCart = useCartStore((state) => state.clearCart);
+  const closeCart = useCartStore((state) => state.closeCart);
 
   useEffect(() => {
-    // Clear the cart when they hit the success page
+    // Clear and close the cart when they hit the success page
     clearCart();
-  }, [clearCart]);
+    closeCart();
+  }, [clearCart, closeCart]);
 
   return (
     <div className="min-h-screen bg-[#fcfcfc] flex items-center justify-center px-4">

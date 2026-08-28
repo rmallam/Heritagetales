@@ -16,6 +16,7 @@ interface CartStore {
   updateQuantity: (cart_item_id: string, quantity: number) => void;
   clearCart: () => void;
   toggleCart: () => void;
+  closeCart: () => void;
 }
 
 export const useCartStore = create<CartStore>()(
@@ -33,7 +34,6 @@ export const useCartStore = create<CartStore>()(
             items: currentItems.map((i) =>
               i.cart_item_id === cart_item_id ? { ...i, quantity: i.quantity + 1 } : i
             ),
-            isOpen: true,
           });
         } else {
           const cartItem: CartItem = {
@@ -43,7 +43,7 @@ export const useCartStore = create<CartStore>()(
             variant_name,
             price: price_override ?? item.price,
           };
-          set({ items: [...currentItems, cartItem], isOpen: true });
+          set({ items: [...currentItems, cartItem] });
         }
       },
       removeItem: (cart_item_id) => {
@@ -56,6 +56,7 @@ export const useCartStore = create<CartStore>()(
       },
       clearCart: () => set({ items: [] }),
       toggleCart: () => set({ isOpen: !get().isOpen }),
+      closeCart: () => set({ isOpen: false }),
     }),
     {
       name: 'heritage-cart',

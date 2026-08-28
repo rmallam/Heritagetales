@@ -33,7 +33,7 @@ export default function Navbar() {
             HERITAGE <span className="text-[#b5955b]">TALES</span>
           </h1>
         </Link>
-        <nav className="flex space-x-6 items-center">
+        <nav className="flex space-x-3 md:space-x-6 items-center">
           <form action="/" className="hidden md:flex relative mr-4">
             <input 
               name="q"
@@ -52,22 +52,22 @@ export default function Navbar() {
             </Link>
           )}
           <SignedIn>
-            <Link href="/orders" className="text-sm font-semibold text-[#666666] hover:text-[#b5955b] transition-colors tracking-wide uppercase">
+            <Link href="/orders" className="text-sm font-semibold text-[#666666] hover:text-[#b5955b] transition-colors tracking-wide uppercase hidden sm:block">
               Orders
             </Link>
           </SignedIn>
           
           <SignedOut>
             <SignInButton mode="modal">
-              <button className="text-sm font-semibold text-[#666666] hover:text-[#222222] transition-colors tracking-wide uppercase">Log In</button>
+              <button className="text-sm font-semibold text-[#666666] hover:text-[#222222] transition-colors tracking-wide uppercase hidden sm:block">Log In</button>
             </SignInButton>
             <SignUpButton mode="modal">
-              <button className="text-sm font-semibold px-4 py-2 bg-[#222222] text-white rounded-full hover:bg-[#b5955b] transition-colors tracking-wide uppercase">Sign Up</button>
+              <button className="text-sm font-semibold px-4 py-2 bg-[#222222] text-white rounded-full hover:bg-[#b5955b] transition-colors tracking-wide uppercase text-xs sm:text-sm">Sign Up</button>
             </SignUpButton>
           </SignedOut>
 
           <SignedIn>
-            <Link href="/profile" className="text-sm font-semibold text-[#666666] hover:text-[#222222] transition-colors tracking-wide uppercase">
+            <Link href="/profile" className="text-sm font-semibold text-[#666666] hover:text-[#222222] transition-colors tracking-wide uppercase hidden sm:block">
               Profile
             </Link>
             <UserButton afterSignOutUrl="/" />
