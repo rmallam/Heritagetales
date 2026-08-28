@@ -426,6 +426,7 @@ export async function addReview(formData: FormData) {
       INSERT INTO reviews (item_id, user_id, user_name, rating, comment, is_approved)
       VALUES (${itemId}, ${userId}, ${userName}, ${rating}, ${comment}, true)
     `;
+    revalidatePath('/product/[slug]', 'page');
     revalidatePath(`/product/${itemId}`);
     return { success: true };
   } catch (error) {
@@ -438,6 +439,7 @@ export async function addReviewResponse(id: number, response: string) {
   try {
     await sql`UPDATE reviews SET admin_response = ${response} WHERE id = ${id}`;
     revalidatePath('/admin/reviews');
+    revalidatePath('/product/[slug]', 'page');
   } catch (error) {
     console.error('Error adding review response:', error);
   }
@@ -487,6 +489,7 @@ export async function deleteReview(id: number) {
   try {
     await sql`DELETE FROM reviews WHERE id = ${id}`;
     revalidatePath('/admin/reviews');
+    revalidatePath('/product/[slug]', 'page');
   } catch (error) {
     console.error('Error deleting review:', error);
   }
