@@ -603,11 +603,11 @@ export async function getDashboardStats() {
   }
 }
 
-export async function getSuggestedItems(excludeIds: number[], limit: number = 2) {
+export async function getSuggestedItems(excludeIds: number[], limit: number = 2): Promise<Item[]> {
   try {
     // Cannot use raw array in IN clause easily with tagged template without a proper builder
     // Let's just fetch all and filter in memory, there are only ~15 items
-    const { rows } = await sql`SELECT * FROM items WHERE stock_count > 0 AND is_active = true`;
+    const { rows } = await sql<Item>`SELECT * FROM items WHERE stock_count > 0 AND is_active = true`;
     const filtered = rows.filter(item => !excludeIds.includes(item.id));
     // Shuffle and pick 2
     return filtered.sort(() => 0.5 - Math.random()).slice(0, limit);
@@ -627,8 +627,7 @@ export async function sendSupportEmail(formData: FormData) {
   }
 
   try {
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+    const { resend, fromEmail } = await import('@/lib/resend');
     
     const { error } = await resend.emails.send({
       from: fromEmail,

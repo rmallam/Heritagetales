@@ -1,6 +1,8 @@
 'use client';
 
 import { useCartStore } from '@/lib/store';
+import { Item } from "@/lib/db";
+
 import { X, Minus, Plus, ShoppingBag } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
@@ -13,7 +15,7 @@ export default function CartDrawer({ storeSettings }: { storeSettings?: { is_sal
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [postcode, setPostcode] = useState('');
   const [shippingCost, setShippingCost] = useState<number | null>(null);
-  const [suggestions, setSuggestions] = useState<Array<{id: number, title: string, price: number, image_url: string, slug: string}>>([]);
+  const [suggestions, setSuggestions] = useState<Item[]>([]);
   const { userId } = useAuth();
   const { user } = useUser();
   
