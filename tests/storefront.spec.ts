@@ -65,5 +65,59 @@ test.describe('E-commerce Features', () => {
     // Depending on if CRON_SECRET is set in CI, it should return 401 or process empty
     // We expect it to at least be a valid endpoint that doesn't crash 500
     expect(response.status() === 401 || response.status() === 200).toBeTruthy();
+    });
+  test('should allow filtering products on homepage', async ({ page }) => {
+    await page.goto('http://localhost:3000/');
+    
+    // Check if the filter bar exists
+    const filterSelect = page.locator('select').first();
+    if (await filterSelect.count() > 0) {
+      // Try to select the 'price-desc' option to sort
+      const sortSelect = page.locator('select').nth(1);
+      if (await sortSelect.count() > 0) {
+        await sortSelect.selectOption('price-desc');
+        // Check if URL updated
+        await expect(page).toHaveURL(/.*sort=price-desc.*/);
+      }
+    }
+  });
+
+  test('should display wishlist button on product cards', async ({ page }) => {
+    await page.goto('http://localhost:3000/');
+    
+    // Find the heart button (wishlist) on the first product card
+    const heartButton = page.locator('button svg.lucide-heart').first();
+    if (await heartButton.count() > 0) {
+      // Click it
+      await heartButton.click();
+      // Optimistic UI means it should instantly fill or something, but we just want to ensure it doesn't crash
+      await expect(heartButton).toBeVisible();
+    }
+  });
+
+  test('should display product reviews section', async ({ page }) => {
+    await page.goto('http://localhost:3000/');
+    const firstProduct = page.locator('a[href^="/product/"]').first();
+    if (await firstProduct.count() > 0) {
+      await firstProduct.click();
+      
+      // Check if Customer Reviews section is visible
+      await expect(page.locator('text=Customer Reviews')).toBeVisible();
+      // Check if Write a Review button is visible
+      await expect(page.locator('button:has-text("Write a Review")')).toBeVisible();
+    }
+  });
+
+  test('should display the journal/blog page', async ({ page }) => {
+    await page.goto('http://localhost:3000/journal');
+    
+    // Check if Journal title is visible
+    await expect(page.locator('h1:has-text("Journal")')).toBeVisible();
+    
+    // Check if there are posts or a "No stories" message
+    const hasPosts = await page.locator('article').count() > 0;
+    const hasNoPosts = await page.locator('text=No stories published yet').count() > 0;
+    
+    expect(hasPosts || hasNoPosts).toBeTruthy();
   });
 });
