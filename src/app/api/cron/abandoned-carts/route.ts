@@ -29,8 +29,19 @@ export async function GET(request: Request) {
     for (const cart of rows) {
       if (!cart.email) continue;
       
-      const items = JSON.parse(cart.items_json);
-      if (items.length === 0) {
+      let items: unknown[] = [];
+      try {
+        items = JSON.parse(cart.items_json || '[]');
+      } catch (error) {
+        console.warn('Invalid cart.items_json. Marking cart as ignored.', {
+          cartId: cart.id,
+          error
+        });
+        await sql`UPDATE carts SET status = 'ignored' WHERE id = ${cart.id}`;
+        continue;
+      }
+
+      if (!Array.isArray(items) || items.length === 0) {
         // Mark empty abandoned carts as ignored
         await sql`UPDATE carts SET status = 'ignored' WHERE id = ${cart.id}`;
         continue;
