@@ -243,7 +243,7 @@ export default function CartDrawer({ storeSettings }: { storeSettings?: { is_sal
                 
                 <button 
                   onClick={handleCheckoutClick}
-                  disabled={isCheckingOut || shippingCost === null}
+                  disabled={isCheckingOut}
                   className="w-full py-4 bg-[#222222] hover:bg-[#111111] disabled:bg-[#a3a3a3] text-white rounded-full font-bold text-lg shadow-md transition-all active:scale-[0.98] flex justify-center items-center mt-4"
                 >
                   {isCheckingOut ? 'Processing...' : 'Checkout Securely'}
