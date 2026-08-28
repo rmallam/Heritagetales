@@ -145,9 +145,9 @@ export default function CartDrawer({ storeSettings }: { storeSettings?: { is_sal
           </div>
         ) : (
           <>
-            <div className="flex-1 overflow-y-auto p-6">
+            <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-8">
               {items.length === 0 ? (
-                <div className="h-full flex flex-col items-center justify-center text-neutral-400 space-y-4">
+                <div className="h-full flex flex-col items-center justify-center text-neutral-400 space-y-4 flex-1 my-auto">
                   <ShoppingBag className="w-12 h-12 opacity-20" />
                   <p>Your cart is empty.</p>
                 </div>
@@ -198,78 +198,83 @@ export default function CartDrawer({ storeSettings }: { storeSettings?: { is_sal
                   })}
                 </div>
               )}
+
+              {items.length > 0 && (
+                <div className="space-y-8 mt-4">
+                  {/* Shipping Calculator moved here so it scrolls */}
+                  <div className="bg-white p-4 rounded-lg border border-neutral-200">
+                    <label htmlFor="postcode" className="block text-sm font-semibold text-neutral-700 mb-2">Estimate Shipping</label>
+                    <div className="flex gap-2">
+                      <input 
+                        type="text" 
+                        id="postcode"
+                        placeholder="Enter Postcode (e.g. 3000)"
+                        className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-1 focus:ring-[#b5955b] outline-none text-sm"
+                        value={postcode}
+                        onChange={(e) => setPostcode(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
+                      />
+                    </div>
+                    {shippingCost !== null && (
+                      <p className="text-sm text-green-700 mt-2 font-medium">
+                        Shipping to {postcode}: ${shippingCost.toFixed(2)}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Suggestions moved here so they scroll */}
+                  {suggestions.length > 0 && (
+                    <div>
+                      <h4 className="text-sm font-semibold text-neutral-900 mb-3">You might also like...</h4>
+                      <div className="space-y-3">
+                        {suggestions.map((item) => (
+                          <div key={item.id} className="flex gap-3 bg-white p-3 rounded-lg border border-neutral-200 items-center">
+                            <div className="w-12 h-12 bg-neutral-100 rounded overflow-hidden flex-shrink-0">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              {item.image_url && <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />}
+                            </div>
+                            <div className="flex-1">
+                              <a href={`/product/${item.slug || item.id}`} className="text-sm font-semibold hover:underline line-clamp-1">{item.title}</a>
+                              <p className="text-xs text-[#b5955b] font-medium">${item.price.toFixed(2)}</p>
+                            </div>
+                            <button 
+                              onClick={() => {
+                                toggleCart();
+                                window.location.href = `/product/${item.slug || item.id}`;
+                              }}
+                              className="px-3 py-1 bg-neutral-100 hover:bg-neutral-200 text-xs font-bold rounded"
+                            >
+                              View
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {items.length > 0 && (
-              <div className="p-6 border-t border-neutral-100 bg-neutral-50 space-y-4">
+              <div className="p-6 border-t border-neutral-200 bg-neutral-50 shrink-0">
                 
-                {suggestions.length > 0 && (
-                  <div className="mb-4">
-                    <h4 className="text-sm font-semibold text-neutral-900 mb-3">You might also like...</h4>
-                    <div className="space-y-3">
-                      {suggestions.map((item) => (
-                        <div key={item.id} className="flex gap-3 bg-white p-3 rounded-lg border border-neutral-200 items-center">
-                          <div className="w-12 h-12 bg-neutral-100 rounded overflow-hidden flex-shrink-0">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            {item.image_url && <img src={item.image_url} alt={item.title} className="w-full h-full object-cover" />}
-                          </div>
-                          <div className="flex-1">
-                            <a href={`/product/${item.slug || item.id}`} className="text-sm font-semibold hover:underline line-clamp-1">{item.title}</a>
-                            <p className="text-xs text-[#b5955b] font-medium">${item.price.toFixed(2)}</p>
-                          </div>
-                          <button 
-                            onClick={() => {
-                              toggleCart();
-                              window.location.href = `/product/${item.slug || item.id}`;
-                            }}
-                            className="px-3 py-1 bg-neutral-100 hover:bg-neutral-200 text-xs font-bold rounded"
-                          >
-                            View
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Shipping Calculator */}
-                <div className="bg-white p-4 rounded-lg border border-neutral-200">
-                  <label htmlFor="postcode" className="block text-sm font-semibold text-neutral-700 mb-2">Estimate Shipping</label>
-                  <div className="flex gap-2">
-                    <input 
-                      type="text" 
-                      id="postcode"
-                      placeholder="Enter Postcode (e.g. 3000)"
-                      className="w-full px-3 py-2 border border-neutral-300 rounded-md focus:ring-1 focus:ring-[#b5955b] outline-none text-sm"
-                      value={postcode}
-                      onChange={(e) => setPostcode(e.target.value.replace(/[^0-9]/g, '').slice(0, 4))}
-                    />
-                  </div>
-                  {shippingCost !== null && (
-                    <p className="text-sm text-green-700 mt-2 font-medium">
-                      Shipping to {postcode}: ${shippingCost.toFixed(2)}
-                    </p>
-                  )}
-                </div>
-
                 {isSaleActive && (
-                  <div className="flex justify-between items-center text-sm text-neutral-500">
+                  <div className="flex justify-between items-center text-sm text-neutral-500 mb-2">
                     <span>Original Subtotal</span>
                     <span className="line-through">${subtotal.toFixed(2)}</span>
                   </div>
                 )}
                 
-                <div className="flex justify-between items-center text-neutral-600">
+                <div className="flex justify-between items-center text-neutral-600 mb-2">
                   <span className="font-semibold">Subtotal</span>
                   <span className="font-medium">${discountedSubtotal.toFixed(2)}</span>
                 </div>
 
-                <div className="flex justify-between items-center text-neutral-600 border-b border-neutral-200 pb-4">
+                <div className="flex justify-between items-center text-neutral-600 border-b border-neutral-200 pb-4 mb-4">
                   <span className="font-semibold">Shipping</span>
                   <span className="font-medium">{shippingCost !== null ? `$${shippingCost.toFixed(2)}` : '---'}</span>
                 </div>
 
-                <div className="flex justify-between items-center pt-2">
+                <div className="flex justify-between items-center mb-6">
                   <span className="font-bold text-neutral-800 text-lg">Total</span>
                   <div className="text-right">
                     <span className="text-2xl font-bold text-neutral-900">${finalTotal.toFixed(2)}</span>
@@ -283,8 +288,8 @@ export default function CartDrawer({ storeSettings }: { storeSettings?: { is_sal
                 
                 <button 
                   onClick={handleCheckoutClick}
-                  disabled={isCheckingOut}
-                  className="w-full py-4 bg-[#222222] hover:bg-[#111111] disabled:bg-[#a3a3a3] text-white rounded-full font-bold text-lg shadow-md transition-all active:scale-[0.98] flex justify-center items-center mt-4"
+                  disabled={isCheckingOut || (postcode.length < 4 && shippingCost === null)}
+                  className="w-full py-4 bg-[#222222] hover:bg-[#111111] disabled:bg-[#a3a3a3] text-white rounded-full font-bold text-lg shadow-md transition-all active:scale-[0.98] flex justify-center items-center"
                 >
                   {isCheckingOut ? 'Processing...' : 'Checkout Securely'}
                 </button>
