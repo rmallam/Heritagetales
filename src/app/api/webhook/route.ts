@@ -80,15 +80,15 @@ export async function POST(req: Request) {
               `;
             }
 
-            // Format Items nicely
+            // Format Items nicely using Stripe line items
             let itemsHtml = '';
             try {
-              const parsedItems = JSON.parse(items_json);
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              itemsHtml = '<ul>' + parsedItems.map((item: any) => 
-                `<li style="margin-bottom: 8px;"><strong>${item.quantity}x ${item.title}</strong> - $${(item.price * item.quantity).toFixed(2)}</li>`
+              const lineItemsList = await stripe.checkout.sessions.listLineItems(session.id);
+              itemsHtml = '<ul>' + lineItemsList.data.map((item) => 
+                `<li style="margin-bottom: 8px;"><strong>${item.quantity}x ${item.description}</strong> - $${(item.amount_total / 100).toFixed(2)}</li>`
               ).join('') + '</ul>';
-            } catch {
+            } catch (err) {
+              console.error('Error fetching line items:', err);
               itemsHtml = '<p>Items enclosed in your order.</p>';
             }
 

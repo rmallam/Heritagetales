@@ -80,8 +80,7 @@ export async function POST(request: Request) {
           id: i.id, 
           quantity: i.quantity, 
           price: i.price,
-          title: i.title,
-          image_url: i.image_url
+          variant_name: i.variant_name || undefined
         }))),
       }
     };
