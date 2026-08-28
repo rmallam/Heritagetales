@@ -632,7 +632,7 @@ export async function sendSupportEmail(formData: FormData) {
     const { error } = await resend.emails.send({
       from: fromEmail,
       to: 'reach@heritagetales.com.au',
-      reply_to: email,
+      replyTo: email,
       subject: `New Support Request from ${name}`,
       html: `
         <h3>Customer Support Request</h3>
