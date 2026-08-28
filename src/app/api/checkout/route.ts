@@ -69,7 +69,6 @@ export async function POST(request: Request) {
       payment_method_types: ['card'],
       line_items,
       mode: 'payment',
-      discounts,
       success_url: `${origin}/success`,
       cancel_url: `${origin}/`,
       shipping_address_collection: {
@@ -86,6 +85,12 @@ export async function POST(request: Request) {
         }))),
       }
     };
+
+    if (discounts) {
+      sessionConfig.discounts = discounts;
+    } else {
+      sessionConfig.allow_promotion_codes = true;
+    }
 
     if (email) {
       sessionConfig.customer_email = email;

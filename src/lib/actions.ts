@@ -602,3 +602,56 @@ export async function getDashboardStats() {
     };
   }
 }
+
+export async function getSuggestedItems(excludeIds: number[], limit: number = 2) {
+  try {
+    // Cannot use raw array in IN clause easily with tagged template without a proper builder
+    // Let's just fetch all and filter in memory, there are only ~15 items
+    const { rows } = await sql`SELECT * FROM items WHERE stock_count > 0 AND is_active = true`;
+    const filtered = rows.filter(item => !excludeIds.includes(item.id));
+    // Shuffle and pick 2
+    return filtered.sort(() => 0.5 - Math.random()).slice(0, limit);
+  } catch (error) {
+    console.error('Error fetching suggested items:', error);
+    return [];
+  }
+}
+
+export async function sendSupportEmail(formData: FormData) {
+  const name = formData.get('name') as string;
+  const email = formData.get('email') as string;
+  const message = formData.get('message') as string;
+  
+  if (!name || !email || !message) {
+    return { error: 'Missing required fields' };
+  }
+
+  try {
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const fromEmail = process.env.RESEND_FROM_EMAIL || 'onboarding@resend.dev';
+    
+    const { error } = await resend.emails.send({
+      from: fromEmail,
+      to: 'reach@heritagetales.com.au',
+      reply_to: email,
+      subject: `New Support Request from ${name}`,
+      html: `
+        <h3>Customer Support Request</h3>
+        <p><strong>Name:</strong> ${name}</p>
+        <p><strong>Email:</strong> ${email}</p>
+        <p><strong>Message:</strong></p>
+        <p style="white-space: pre-wrap;">${message}</p>
+      `
+    });
+
+    if (error) {
+      console.error('Resend Error:', error);
+      return { error: 'Failed to send message' };
+    }
+
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending support email:', error);
+    return { error: 'An unexpected error occurred' };
+  }
+}

@@ -7,7 +7,42 @@ import ReviewSection from '@/components/ReviewSection';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
 
+import { Metadata } from 'next';
+
 export const dynamic = 'force-dynamic';
+
+export async function generateMetadata(
+  { params }: { params: { slug: string } },
+  
+): Promise<Metadata> {
+  let item = await getItemBySlug(params.slug);
+  if (!item && !isNaN(Number(params.slug))) {
+    item = await getItem(Number(params.slug));
+  }
+
+  if (!item) {
+    return { title: 'Product Not Found - Heritage Tales' };
+  }
+
+  const images = item.image_url ? [item.image_url] : [];
+  
+  return {
+    title: `${item.title} - Heritage Tales`,
+    description: item.description.substring(0, 160),
+    openGraph: {
+      title: `${item.title} | Heritage Tales`,
+      description: item.description.substring(0, 160),
+      images: images,
+      type: 'website',
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: item.title,
+      description: item.description.substring(0, 160),
+      images: images,
+    }
+  };
+}
 
 export default async function ProductPage({ params }: { params: { slug: string } }) {
   let item = await getItemBySlug(params.slug);
