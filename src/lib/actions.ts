@@ -137,15 +137,29 @@ export async function addItem(formData: FormData) {
     if (!process.env.BLOB_READ_WRITE_TOKEN) {
       console.warn('Vercel Blob token is missing! Cannot upload image. Please add Vercel Blob storage to your project.');
     } else {
-      const blob = await put(imageFile.name, imageFile, {
-        access: 'public',
-      });
+      const blob = await put(imageFile.name, imageFile, { access: 'public' });
       image_url = blob.url;
     }
   }
 
+  const additionalFiles = formData.getAll('additional_image_files') as File[];
+  const uploadedAdditionalUrls: string[] = [];
+  
+  if (process.env.BLOB_READ_WRITE_TOKEN) {
+    for (const file of additionalFiles) {
+      if (file && file.size > 0) {
+        const blob = await put(file.name, file, { access: 'public' });
+        uploadedAdditionalUrls.push(blob.url);
+      }
+    }
+  }
+
+  // Allow comma-separated strings as well, and merge them with newly uploaded files
+  const manualAdditional = additionalStr ? additionalStr.split(',').map(s => s.trim()).filter(Boolean) : [];
+  const allAdditionalUrls = [...manualAdditional, ...uploadedAdditionalUrls];
+
   const price = parseFloat(priceStr);
-  const additional_images = additionalStr ? JSON.stringify(additionalStr.split(',').map(s => s.trim())) : '[]';
+  const additional_images = JSON.stringify(allAdditionalUrls);
   const variants = formData.get('variants_json') as string || '[]';
   const stockCount = parseInt(formData.get('stock_count') as string) || 10;
   

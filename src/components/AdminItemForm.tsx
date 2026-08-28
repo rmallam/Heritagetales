@@ -59,9 +59,15 @@ export default function AdminItemForm() {
           <input type="number" id="stock_count" name="stock_count" required defaultValue="10" min="0" className="w-full px-4 py-3 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition-all" />
         </div>
       </div>
-      <div>
-        <label htmlFor="image_file" className="block text-sm font-semibold text-neutral-900 mb-2">Primary Image (Upload File)</label>
-        <input type="file" id="image_file" name="image_file" accept="image/*" className="w-full px-4 py-3 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition-all bg-white" />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="image_file" className="block text-sm font-semibold text-neutral-900 mb-2">Primary Image</label>
+          <input type="file" id="image_file" name="image_file" accept="image/*" className="w-full px-4 py-3 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition-all bg-white" required />
+        </div>
+        <div>
+          <label htmlFor="additional_image_files" className="block text-sm font-semibold text-neutral-900 mb-2">Additional Images (Optional)</label>
+          <input type="file" id="additional_image_files" name="additional_image_files" accept="image/*" multiple className="w-full px-4 py-3 rounded-lg border border-neutral-300 focus:ring-2 focus:ring-black focus:border-black outline-none transition-all bg-white" />
+        </div>
       </div>
       <div>
         <label htmlFor="tags" className="block text-sm font-semibold text-neutral-900 mb-2">Tags (comma separated)</label>
