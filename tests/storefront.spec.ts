@@ -75,9 +75,9 @@ test.describe('E-commerce Features', () => {
       // Try to select the 'price-desc' option to sort
       const sortSelect = page.locator('select').nth(1);
       if (await sortSelect.count() > 0) {
-        await sortSelect.selectOption('price-desc');
+        await sortSelect.selectOption('price_desc');
         // Check if URL updated
-        await expect(page).toHaveURL(/.*sort=price-desc.*/);
+        await expect(page).toHaveURL(/.*sort=price_desc.*/);
       }
     }
   });
@@ -103,8 +103,8 @@ test.describe('E-commerce Features', () => {
       
       // Check if Customer Reviews section is visible
       await expect(page.locator('text=Customer Reviews')).toBeVisible();
-      // Check if Write a Review button is visible
-      await expect(page.locator('button:has-text("Write a Review")')).toBeVisible();
+      // Check if Write a Review form heading is visible
+      await expect(page.locator('text=Write a Review').first()).toBeVisible();
     }
   });
 
